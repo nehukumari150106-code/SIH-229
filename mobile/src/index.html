@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Kabadiwala Connect - Collector</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- ================= LOGIN ================= -->
+    <section id="loginScreen" class="screen active">
+
+        <div class="login-container">
+
+            <div class="logo">♻️</div>
+
+            <h1>Kabadiwala Connect</h1>
+
+            <p class="subtitle">Collector Portal</p>
+
+            <div class="input-group">
+                <label>Mobile Number</label>
+                <input
+                    type="text"
+                    id="mobileNumber"
+                    placeholder="Enter mobile number"
+                >
+            </div>
+
+            <div class="input-group">
+                <label>Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Enter password"
+                >
+            </div>
+
+            <button onclick="login()">Login</button>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= DASHBOARD ================= -->
+    <section id="dashboardScreen" class="screen">
+
+        <header class="top-header">
+
+            <div>
+                <p class="small-text">Welcome back</p>
+                <h2>Collector Dashboard</h2>
+            </div>
+
+            <button
+                class="notification-button"
+                onclick="showScreen('notificationsScreen')">
+                🔔
+            </button>
+
+        </header>
+
+
+        <div class="welcome-card">
+
+            <div>
+                <h3>Hello, Collector 👋</h3>
+
+                <p>
+                    Manage your pickup requests and collections.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="stats-grid">
+
+            <div class="stat-card">
+                <span class="stat-icon">📦</span>
+                <h3>5</h3>
+                <p>New Requests</p>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-icon">🚚</span>
+                <h3>2</h3>
+                <p>Active Pickups</p>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-icon">₹</span>
+                <h3>₹2,450</h3>
+                <p>Earnings</p>
+            </div>
+
+        </div>
+
+
+        <h3 class="section-title">Quick Actions</h3>
+
+        <div class="menu-grid">
+
+            <button
+                class="menu-card"
+                onclick="showScreen('requestsScreen')">
+                <span>📋</span>
+                <strong>Incoming Requests</strong>
+                <small>View new requests</small>
+            </button>
+
+            <button
+                class="menu-card"
+                onclick="showScreen('activePickupScreen')">
+                <span>🚚</span>
+                <strong>Active Pickup</strong>
+                <small>Manage current pickup</small>
+            </button>
+
+            <button
+                class="menu-card"
+                onclick="showScreen('myPickupsScreen')">
+                <span>📦</span>
+                <strong>My Pickups</strong>
+                <small>View pickup history</small>
+            </button>
+
+            <button
+                class="menu-card"
+                onclick="showScreen('earningsScreen')">
+                <span>💰</span>
+                <strong>Earnings</strong>
+                <small>View earnings</small>
+            </button>
+
+            <button
+                class="menu-card"
+                onclick="showScreen('transactionsScreen')">
+                <span>💳</span>
+                <strong>Transactions</strong>
+                <small>View transactions</small>
+            </button>
+
+            <button
+                class="menu-card"
+                onclick="showScreen('profileScreen')">
+                <span>👤</span>
+                <strong>Profile</strong>
+                <small>Manage profile</small>
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= INCOMING REQUESTS ================= -->
+    <section id="requestsScreen" class="screen">
+
+        <header class="page-header">
+
+            <button
+                class="back-button"
+                onclick="showScreen('dashboardScreen')">
+                ←
+            </button>
+
+            <div>
+                <h2>Incoming Requests</h2>
+                <p>New customer pickup requests</p>
+            </div>
+
+        </header>
+
+
+        <div class="filter-row">
+
+            <button class="filter active-filter">
+                All
+            </button>
+
+            <button class="filter">
+                Pending
+            </button>
+
+            <button class="filter">
+                Nearby
+            </button>
+
+        </div>
+
+
+        <div class="request-card">
+
+            <div class="card-top">
+
+                <div>
+                    <span class="material-icon">🔧</span>
+                    <strong>PCB</strong>
+                </div>
+
+                <span class="status pending">
+                    Pending
+                </span>
+
+            </div>
+
+            <div class="divider"></div>
+
+            <p><strong>Customer:</strong> Rahul</p>
+
+            <p><strong>Estimated Weight:</strong> 5 kg</p>
+
+            <p><strong>Location:</strong> Parner</p>
+
+            <p><strong>Preferred Time:</strong> 4:00 PM</p>
+
+            <button onclick="openPickupDetails('PICK-001')">
+                View Pickup
+            </button>
+
+        </div>
+
+
+        <div class="request-card">
+
+            <div class="card-top">
+
+                <div>
+                    <span class="material-icon">🔌</span>
+                    <strong>Cable</strong>
+                </div>
+
+                <span class="status pending">
+                    Pending
+                </span>
+
+            </div>
+
+            <div class="divider"></div>
+
+            <p><strong>Customer:</strong> Priya</p>
+
+            <p><strong>Estimated Weight:</strong> 8 kg</p>
+
+            <p><strong>Location:</strong> Parner</p>
+
+            <p><strong>Preferred Time:</strong> 5:30 PM</p>
+
+            <button onclick="openPickupDetails('PICK-002')">
+                View Pickup
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= PICKUP DETAILS ================= -->
+    <section id="pickupDetailsScreen" class="screen">
+
+        <header class="page-header">
+
+            <button
+                class="back-button"
+                onclick="showScreen('requestsScreen')">
+                ←
+            </button>
+
+            <div>
+                <h2>Pickup Details</h2>
+                <p id="pickupIdText">PICK-001</p>
+            </div>
+
+        </header>
+
+
+        <div class="details-card">
+
+            <div class="large-material-icon">
+                🔧
+            </div>
+
+            <h2 id="detailMaterial">
+                PCB Scrap
+            </h2>
+
+            <span class="status pending">
+                Pending
+            </span>
+
+
+            <div class="details-list">
+
+                <div class="detail-row">
+                    <span>Customer</span>
+                    <strong id="detailCustomer">
+                        Rahul
+                    </strong>
+                </div>
+
+                <div class="detail-row">
+                    <span>Material</span>
+                    <strong id="detailMaterialName">
+                        PCB
+                    </strong>
+                </div>
+
+                <div class="detail-row">
+                    <span>Estimated Weight</span>
+                    <strong id="detailWeight">
+                        5 kg
+                    </strong>
+                </div>
+
+                <div class="detail-row">
+                    <span>Location</span>
+                    <strong id="detailLocation">
+                        Parner
+                    </strong>
+                </div>
+
+                <div class="detail-row">
+                    <span>Preferred Time</span>
+                    <strong id="detailTime">
+                        4:00 PM
+                    </strong>
+                </div>
+
+            </div>
+
+
+            <div class="location-box">
+                📍 Pickup Location
+                <br>
+                <strong>Parner</strong>
+            </div>
+
+
+            <button onclick="acceptPickup()">
+                Accept Pickup
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= ACTIVE PICKUP ================= -->
+    <section id="activePickupScreen" class="screen">
+
+        <header class="page-header">
+
+            <button
+                class="back-button"
+                onclick="showScreen('dashboardScreen')">
+                ←
+            </button>
+
+            <div>
+                <h2>Active Pickup</h2>
+                <p>Current collection</p>
+            </div>
+
+        </header>
+
+
+        <div class="active-card">
+
+            <div class="success-status">
+                ✓ Pickup Accepted
+            </div>
+
+            <h2>PCB Scrap</h2>
+
+            <p>
+                Pickup ID:
+                <strong>PICK-001</strong>
+            </p>
+
+
+            <div class="details-list">
+
+                <div class="detail-row">
+                    <span>Customer</span>
+                    <strong>Rahul</strong>
+                </div>
+
+                <div class="detail-row">
+                    <span>Estimated Weight</span>
+                    <strong>5 kg</strong>
+                </div>
+
+                <div class="detail-row">
+                    <span>Location</span>
+                    <strong>Parner</strong>
+                </div>
+
+                <div class="detail-row">
+                    <span>Preferred Time</span>
+                    <strong>4:00 PM</strong>
+                </div>
+
+            </div>
+
+
+            <div class="progress-container">
+
+                <div class="progress-step completed-step">
+                    ✓
+                    <span>Accepted</span>
+                </div>
+
+                <div class="progress-line"></div>
+
+                <div class="progress-step current-step">
+                    2
+                    <span>Collect</span>
+                </div>
+
+                <div class="progress-line"></div>
+
+                <div class="progress-step">
+                    3
+                    <span>Complete</span>
+                </div>
+
+            </div>
+
+
+            <button onclick="showScreen('weightScreen')">
+                Record Actual Weight
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= RECORD WEIGHT ================= -->
+    <section id="weightScreen" class="screen">
+
+        <header class="page-header">
+
+            <button
+                class="back-button"
+                onclick="showScreen('activePickupScreen')">
+                ←
+            </button>
+
+            <div>
+                <h2>Record Weight</h2>
+                <p>Enter actual collected weight</p>
+            </div>
+
+        </header>
+
+
+        <div class="weight-card">
+
+            <div class="weight-summary">
+
+                <p>Customer Estimated Weight</p>
+
+                <h2>5 kg</h2>
+
+            </div>
+
+
+            <label for="actualWeight">
+                Actual Weight
+            </label>
+
+            <div class="weight-input">
+
+                <input
+                    type="number"
+                    id="actualWeight"
+                    placeholder="0.0"
+                    step="0.1"
+                    min="0"
+                >
+
+                <span>kg</span>
+
+            </div>
+
+
+            <p class="help-text">
+                Enter the weight measured after collecting the material.
+            </p>
+
+
+            <div class="warning-box">
+                ⚠️ Actual weight should be the physically measured weight.
+            </div>
+
+
+            <button onclick="recordWeight()">
+                Confirm Weight
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= PAYMENT CONFIRMATION ================= -->
+    <section id="paymentScreen" class="screen">
+
+        <header class="page-header">
+
+            <button
+                class="back-button"
+                onclick="showScreen('activePickupScreen')">
+                ←
+            </button>
+
+            <div>
+                <h2>Payment Confirmation</h2>
+                <p>Pickup completed</p>
+            </div>
+
+        </header>
+
+
+        <div class="success-card">
+
+            <div class="success-icon">
+                ✓
+            </div>
+
+            <h2>Pickup Completed</h2>
+
+            <p>
+                The material has been successfully collected.
+            </p>
+
+
+            <div class="payment-summary">
+
+                <div>
+                    <span>Pickup ID</span>
+                    <strong>PICK-001</strong>
+                </div>
+
+                <div>
+                    <span>Material</span>
+                    <strong>PCB</strong>
+                </div>
+
+                <div>
+                    <span>Actual Weight</span>
+                    <strong id="finalWeight">
+                        4.8 kg
+                    </strong>
+                </div>
+
+                <div>
+                    <span>Payment</span>
+                    <strong>₹1,920</strong>
+                </div>
+
+                <div>
+                    <span>Payment Method</span>
+                    <strong>UPI</strong>
+                </div>
+
+                <div>
+                    <span>Status</span>
+                    <strong class="success-text">
+                        Completed
+                    </strong>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <button onclick="showScreen('myPickupsScreen')">
+            View My Pickups
+        </button>
+
+    </section>
+
+
+    <!-- ================= MY PICKUPS ================= -->
+    <section id="myPickupsScreen" class="screen">
+
+        <header class="page-header">
+
+            <button
+                class="back-button"
+                onclick="showScreen('dashboardScreen')">
+                ←
+            </button>
+
+            <div>
+                <h2>My Pickups</h2>
+                <p>Your collection history</p>
+            </div>
+
+        </header>
+
+
+        <div class="pickup-history-card">
+
+            <div class="card-top">
+
+                <strong>PCB Scrap</strong>
+
+                <span class="status completed">
+                    Completed
+                </span>
+
+            </div>
+
+            <p>Pickup ID: PICK-001</p>
+
+            <p>Actual Weight: <strong>4.8 kg</strong></p>
+
+            <p>Location: Parner</p>
+
+            <p>Date: 20 Sep 2026</p>
+
+        </div>
+
+
+        <div class="pickup-history-card">
+
+            <div class="card-top">
+
+                <strong>Cable Scrap</strong>
+
+                <span class="status accepted">
+                    Accepted
+                </span>
+
+            </div>
+
+            <p>Pickup ID: PICK-002</p>
+
+            <p>Estimated Weight: <strong>8 kg</strong></p>
+
+            <p>Location: Parner</p>
+
+            <p>Date: 20 Sep 2026</p>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= EARNINGS ================= -->
+    <section id="earningsScreen" class="screen">
+
+        <header class="page-header">
+
+            <button
+                class="back-button"
+                onclick="showScreen('dashboardScreen')">
+                ←
+            </button>
+
+            <div>
+                <h2>Earnings</h2>
+                <p>Track your earnings</p>
+            </div>
+
+        </header>
+
+
+        <div class="earnings-main">
+
+            <p>Total Earnings</p>
+
+            <h1>₹2,450</h1>
+
+            <p>This Month</p>
+
+        </div>
+
+
+        <div class="stats-grid">
+
+            <div class="stat-card">
+                <h3>12</h3>
+                <p>Completed Pickups</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>86 kg</h3>
+                <p>Total Weight</p>
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>Recent Earnings</h3>
+
+            <div class="earning-row">
+                <span>PICK-001</span>
+                <strong>₹1,920</strong>
+            </div>
+
+            <div class="earning-row">
+                <span>PICK-002</span>
+                <strong>₹530</strong>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= TRANSACTIONS ================= -->
+    <section id="transactionsScreen" class="screen">
+
+        <header class="page-header">
+
+            <button
+                class="back-button"
+                onclick="showScreen('dashboardScreen')">
+                ←
+            </button>
+
+            <div>
+                <h2>Transactions</h2>
+                <p>Payment history</p>
+            </div>
+
+        </header>
+
+
+        <div
+            class="transaction-card"
+            onclick="openTransaction('TXN-001')">
+
+            <div>
+                <strong>TXN-001</strong>
+                <p>PCB • 4.8 kg</p>
+            </div>
+
+            <div class="transaction-right">
+                <strong>₹1,920</strong>
+                <span class="status completed">
+                    Completed
+                </span>
+            </div>
+
+        </div>
+
+
+        <div
+            class="transaction-card"
+            onclick="openTransaction('TXN-002')">
+
+            <div>
+                <strong>TXN-002</strong>
+                <p>Cable • 8 kg</p>
+            </div>
+
+            <div class="transaction-right">
+                <strong>₹1,250</strong>
+                <span class="status completed">
+                    Completed
+                </span>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= TRANSACTION DETAILS ================= -->
+    <section id="transactionDetailsScreen" class="screen">
+
+        <header class="page-header">
+
+            <button
+                class="back-button"
+                onclick="showScreen('transactionsScreen')">
+                ←
+            </button>
+
+            <div>
+                <h2>Transaction Details</h2>
+                <p id="transactionId">TXN-001</p>
+            </div>
+
+        </header>
+
+
+        <div class="details-card">
+
+            <div class="transaction-large-icon">
+                💳
+            </div>
+
+            <h2>₹1,920</h2>
+
+            <span class="status completed">
+                Payment Completed
+            </span>
+
+
+            <div class="details-list">
+
+                <div class="detail-row">
+                    <span>Transaction ID</span>
+                    <strong id="transactionIdDetail">
+                        TXN-001
+                    </strong>
+                </div>
+
+                <div class="detail-row">
+                    <span>Lot ID</span>
+                    <strong>LOT-001</strong>
+                </div>
+
+                <div class="detail-row">
+                    <span>Material</span>
+                    <strong>PCB</strong>
+                </div>
+
+                <div class="detail-row">
+                    <span>Actual Weight</span>
+                    <strong>4.8 kg</strong>
+                </div>
+
+                <div class="detail-row">
+                    <span>Price per kg</span>
+                    <strong>₹400</strong>
+                </div>
+
+                <div class="detail-row">
+                    <span>Total Amount</span>
+                    <strong>₹1,920</strong>
+                </div>
+
+                <div class="detail-row">
+                    <span>Payment Method</span>
+                    <strong>UPI</strong>
+                </div>
+
+                <div class="detail-row">
+                    <span>Payment Status</span>
+                    <strong class="success-text">
+                        Completed
+                    </strong>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= NOTIFICATIONS ================= -->
+    <section id="notificationsScreen" class="screen">
+
+        <header class="page-header">
+
+            <button
+                class="back-button"
+                onclick="showScreen('dashboardScreen')">
+                ←
+            </button>
+
+            <div>
+                <h2>Notifications</h2>
+                <p>Recent updates</p>
+            </div>
+
+        </header>
+
+
+        <div class="notification-card unread">
+
+            <div class="notification-icon">
+                📦
+            </div>
+
+            <div>
+                <strong>New Pickup Request</strong>
+
+                <p>
+                    A new PCB pickup request has been received.
+                </p>
+
+                <small>
+                    10 minutes ago
+                </small>
+            </div>
+
+        </div>
+
+
+        <div class="notification-card">
+
+            <div class="notification-icon">
+                ✓
+            </div>
+
+            <div>
+                <strong>Payment Completed</strong>
+
+                <p>
+                    Payment for PICK-001 has been completed.
+                </p>
+
+                <small>
+                    1 hour ago
+                </small>
+            </div>
+
+        </div>
+
+
+        <div class="notification-card">
+
+            <div class="notification-icon">
+                🚚
+            </div>
+
+            <div>
+                <strong>Pickup Accepted</strong>
+
+                <p>
+                    Pickup PICK-002 has been accepted.
+                </p>
+
+                <small>
+                    2 hours ago
+                </small>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= PROFILE ================= -->
+    <section id="profileScreen" class="screen">
+
+        <header class="page-header">
+
+            <button
+                class="back-button"
+                onclick="showScreen('dashboardScreen')">
+                ←
+            </button>
+
+            <div>
+                <h2>Collector Profile</h2>
+                <p>Your account details</p>
+            </div>
+
+        </header>
+
+
+        <div class="profile-card">
+
+            <div class="profile-avatar">
+                👤
+            </div>
+
+            <h2>Collector</h2>
+
+            <span class="role-badge">
+                Collector
+            </span>
+
+
+            <div class="details-list">
+
+                <div class="detail-row">
+                    <span>Mobile</span>
+                    <strong>9876543210</strong>
+                </div>
+
+                <div class="detail-row">
+                    <span>Location</span>
+                    <strong>Parner</strong>
+                </div>
+
+                <div class="detail-row">
+                    <span>Role</span>
+                    <strong>Collector</strong>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <button
+            class="logout-button"
+            onclick="logout()">
+            Logout
+        </button>
+
+    </section>
+
+</div>
+
+
+<script src="script.js"></script>
+
+</body>
+</html>
