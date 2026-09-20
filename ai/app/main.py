@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File
 
 app = FastAPI(title="Kabadiwala Connect AI")
 
@@ -9,8 +9,9 @@ def home():
 
 
 @app.post("/analyze")
-def analyze():
+async def analyze(image: UploadFile = File(...)):
     return {
-        "material": "PCB",
-        "confidence": 0.91
-    }
+    "material": "PCB",
+    "confidence": 0.91,
+    "simulated": True
+}
