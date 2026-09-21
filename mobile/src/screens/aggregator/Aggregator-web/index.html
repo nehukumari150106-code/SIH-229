@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Kabadiwala Connect - Aggregator</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="app">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+
+            <div class="logo">
+                <div class="logo-icon">♻</div>
+
+                <div>
+                    <h2>Kabadiwala</h2>
+                    <span>Connect</span>
+                </div>
+            </div>
+
+            <div class="role">
+                AGGREGATOR
+            </div>
+
+            <nav>
+
+                <button class="nav-btn active"
+                    onclick="showPage('dashboard', this)">
+                    🏠 Dashboard
+                </button>
+
+                <button class="nav-btn"
+                    onclick="showPage('incoming', this)">
+                    📦 Incoming Lots
+                </button>
+
+                <button class="nav-btn"
+                    onclick="showPage('inventory', this)">
+                    📊 Inventory
+                </button>
+
+                <button class="nav-btn"
+                    onclick="showPage('offers', this)">
+                    ₹ Recycler Offers
+                </button>
+
+                <button class="nav-btn"
+                    onclick="showPage('handover', this)">
+                    🚚 Handover
+                </button>
+
+                <button class="nav-btn"
+                    onclick="showPage('transactions', this)">
+                    💳 Transactions
+                </button>
+
+                <button class="nav-btn"
+                    onclick="showPage('profile', this)">
+                    👤 Profile
+                </button>
+
+            </nav>
+
+            <div class="bottom-menu">
+
+                <button class="nav-btn"
+                    onclick="showNotification()">
+                    🔔 Notifications
+                    <span class="notification">3</span>
+                </button>
+
+                <button class="nav-btn"
+                    onclick="logout()">
+                    ⇥ Logout
+                </button>
+
+            </div>
+
+        </aside>
+
+
+        <!-- MAIN CONTENT -->
+        <main class="main">
+
+            <!-- TOP BAR -->
+            <header class="topbar">
+
+                <div>
+                    <p>Aggregator Module</p>
+
+                    <h1 id="pageTitle">
+                        Aggregator Dashboard
+                    </h1>
+                </div>
+
+                <div class="user">
+
+                    <div class="avatar">
+                        RP
+                    </div>
+
+                    <div>
+                        <strong>Rahul Patil</strong>
+                        <small>Aggregator</small>
+                    </div>
+
+                </div>
+
+            </header>
+
+
+            <section class="content">
+
+
+                <!-- ================= DASHBOARD ================= -->
+
+                <div id="dashboard" class="page active">
+
+                    <div class="page-heading">
+
+                        <div>
+                            <h2>Good afternoon, Rahul 👋</h2>
+
+                            <p>
+                                Manage collected lots, inventory
+                                and recycler activity.
+                            </p>
+                        </div>
+
+                        <button class="primary"
+                            onclick="showPage('incoming')">
+                            View Incoming Lots
+                        </button>
+
+                    </div>
+
+
+                    <!-- STAT CARDS -->
+
+                    <div class="stats">
+
+                        <div class="stat-card">
+                            <span>Total Lots</span>
+                            <h2>24</h2>
+                            <small>+4 this week</small>
+                        </div>
+
+                        <div class="stat-card">
+                            <span>Pending Lots</span>
+                            <h2>5</h2>
+                            <small>Need attention</small>
+                        </div>
+
+                        <div class="stat-card">
+                            <span>Inventory</span>
+                            <h2>180 kg</h2>
+                            <small>4 categories</small>
+                        </div>
+
+                        <div class="stat-card">
+                            <span>This Month</span>
+                            <h2>₹42.6K</h2>
+                            <small>Transaction value</small>
+                        </div>
+
+                    </div>
+
+
+                    <div class="grid-2">
+
+                        <!-- RECENT LOTS -->
+
+                        <div class="card">
+
+                            <div class="card-header">
+
+                                <h3>Recent Incoming Lots</h3>
+
+                                <button onclick="showPage('incoming')">
+                                    View all →
+                                </button>
+
+                            </div>
+
+
+                            <div class="lot">
+
+                                <div class="lot-icon">
+                                    ▦
+                                </div>
+
+                                <div class="lot-info">
+
+                                    <strong>
+                                        PCB · LOT-1024
+                                    </strong>
+
+                                    <p>
+                                        Amit Shinde · Rajur
+                                    </p>
+
+                                    <span class="status received">
+                                        ● Received
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    25 kg
+                                </strong>
+
+                            </div>
+
+
+                            <div class="lot">
+
+                                <div class="lot-icon">
+                                    〰
+                                </div>
+
+                                <div class="lot-info">
+
+                                    <strong>
+                                        Cable · LOT-1025
+                                    </strong>
+
+                                    <p>
+                                        Suresh Pawar · Parner
+                                    </p>
+
+                                    <span class="status received">
+                                        ● Received
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    40 kg
+                                </strong>
+
+                            </div>
+
+
+                            <div class="lot">
+
+                                <div class="lot-icon">
+                                    ⚙
+                                </div>
+
+                                <div class="lot-info">
+
+                                    <strong>
+                                        Motor · LOT-1026
+                                    </strong>
+
+                                    <p>
+                                        Rahul Jadhav · Shirur
+                                    </p>
+
+                                    <span class="status processing">
+                                        ● Processing
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    18 kg
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- INVENTORY SUMMARY -->
+
+                        <div class="card">
+
+                            <div class="card-header">
+
+                                <h3>Inventory Summary</h3>
+
+                                <button onclick="showPage('inventory')">
+                                    View →
+                                </button>
+
+                            </div>
+
+
+                            <div class="inventory-row">
+
+                                <strong>PCB</strong>
+
+                                <div class="progress">
+                                    <span style="width:90%"></span>
+                                </div>
+
+                                <b>75 kg</b>
+
+                            </div>
+
+
+                            <div class="inventory-row">
+
+                                <strong>Cable</strong>
+
+                                <div class="progress">
+                                    <span style="width:55%"></span>
+                                </div>
+
+                                <b>40 kg</b>
+
+                            </div>
+
+
+                            <div class="inventory-row">
+
+                                <strong>Motor</strong>
+
+                                <div class="progress">
+                                    <span style="width:40%"></span>
+                                </div>
+
+                                <b>30 kg</b>
+
+                            </div>
+
+
+                            <div class="inventory-row">
+
+                                <strong>Mixed Plastic</strong>
+
+                                <div class="progress">
+                                    <span style="width:45%"></span>
+                                </div>
+
+                                <b>35 kg</b>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- RECYCLER OFFERS -->
+
+                    <div class="card">
+
+                        <div class="card-header">
+
+                            <h3>Latest Recycler Offers</h3>
+
+                            <button onclick="showPage('offers')">
+                                View all →
+                            </button>
+
+                        </div>
+
+
+                        <div class="offer">
+
+                            <div>
+                                <strong>
+                                    EcoRecycle Pvt. Ltd.
+                                </strong>
+
+                                <p>
+                                    LOT-1024 · PCB · 25 kg
+                                </p>
+                            </div>
+
+                            <strong class="price">
+                                ₹420/kg
+                            </strong>
+
+                        </div>
+
+
+                        <div class="offer">
+
+                            <div>
+                                <strong>
+                                    Green Earth Recyclers
+                                </strong>
+
+                                <p>
+                                    LOT-1025 · Cable · 40 kg
+                                </p>
+                            </div>
+
+                            <strong class="price">
+                                ₹310/kg
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ================= INCOMING LOTS ================= -->
+
+                <div id="incoming" class="page">
+
+                    <div class="page-heading">
+
+                        <div>
+                            <h2>Incoming Lots</h2>
+
+                            <p>
+                                Lots received from collectors.
+                            </p>
+                        </div>
+
+                        <button class="secondary"
+                            onclick="showToast('Data refreshed')">
+                            ↻ Refresh
+                        </button>
+
+                    </div>
+
+
+                    <div class="card">
+
+                        <input
+                            type="text"
+                            id="search"
+                            class="search"
+                            placeholder="Search lot, material or collector..."
+                            onkeyup="searchLots()"
+                        >
+
+
+                        <div class="table-container">
+
+                            <table>
+
+                                <thead>
+
+                                    <tr>
+                                        <th>Lot ID</th>
+                                        <th>Material</th>
+                                        <th>Weight</th>
+                                        <th>Collector</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody id="lotTable">
+
+                                    <tr>
+
+                                        <td>
+                                            <strong>LOT-1024</strong>
+                                        </td>
+
+                                        <td>PCB</td>
+
+                                        <td>25 kg</td>
+
+                                        <td>Amit Shinde</td>
+
+                                        <td>21 Sep 2026</td>
+
+                                        <td>
+                                            <span class="status received">
+                                                Received
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <button class="small"
+                                                onclick="lotDetails('LOT-1024')">
+                                                View
+                                            </button>
+                                        </td>
+
+                                    </tr>
+
+
+                                    <tr>
+
+                                        <td>
+                                            <strong>LOT-1025</strong>
+                                        </td>
+
+                                        <td>Cable</td>
+
+                                        <td>40 kg</td>
+
+                                        <td>Suresh Pawar</td>
+
+                                        <td>21 Sep 2026</td>
+
+                                        <td>
+                                            <span class="status received">
+                                                Received
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <button class="small"
+                                                onclick="lotDetails('LOT-1025')">
+                                                View
+                                            </button>
+                                        </td>
+
+                                    </tr>
+
+
+                                    <tr>
+
+                                        <td>
+                                            <strong>LOT-1026</strong>
+                                        </td>
+
+                                        <td>Motor</td>
+
+                                        <td>18 kg</td>
+
+                                        <td>Rahul Jadhav</td>
+
+                                        <td>20 Sep 2026</td>
+
+                                        <td>
+                                            <span class="status processing">
+                                                Processing
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <button class="small"
+                                                onclick="lotDetails('LOT-1026')">
+                                                View
+                                            </button>
+                                        </td>
+
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ================= INVENTORY ================= -->
+
+                <div id="inventory" class="page">
+
+                    <div class="page-heading">
+
+                        <div>
+                            <h2>Inventory</h2>
+
+                            <p>
+                                Current material stock.
+                            </p>
+                        </div>
+
+                        <button class="primary"
+                            onclick="showToast('Add Inventory form opened')">
+                            + Add Inventory
+                        </button>
+
+                    </div>
+
+
+                    <div class="stats">
+
+                        <div class="stat-card">
+                            <span>Total Inventory</span>
+                            <h2>180 kg</h2>
+                        </div>
+
+                        <div class="stat-card">
+                            <span>Categories</span>
+                            <h2>4</h2>
+                        </div>
+
+                        <div class="stat-card">
+                            <span>Available Lots</span>
+                            <h2>24</h2>
+                        </div>
+
+                        <div class="stat-card">
+                            <span>Reserved</span>
+                            <h2>18 kg</h2>
+                        </div>
+
+                    </div>
+
+
+                    <div class="card">
+
+                        <h3>Material Categories</h3>
+
+
+                        <div class="material-card">
+
+                            <div>
+                                <h3>▦ PCB</h3>
+
+                                <p>
+                                    75 kg available
+                                </p>
+
+                                <div class="progress">
+                                    <span style="width:90%"></span>
+                                </div>
+
+                            </div>
+
+                            <strong>75 kg</strong>
+
+                        </div>
+
+
+                        <div class="material-card">
+
+                            <div>
+                                <h3>〰 Cable</h3>
+
+                                <p>
+                                    40 kg available
+                                </p>
+
+                                <div class="progress">
+                                    <span style="width:55%"></span>
+                                </div>
+
+                            </div>
+
+                            <strong>40 kg</strong>
+
+                        </div>
+
+
+                        <div class="material-card">
+
+                            <div>
+                                <h3>⚙ Motor</h3>
+
+                                <p>
+                                    30 kg available
+                                </p>
+
+                                <div class="progress">
+                                    <span style="width:40%"></span>
+                                </div>
+
+                            </div>
+
+                            <strong>30 kg</strong>
+
+                        </div>
+
+
+                        <div class="material-card">
+
+                            <div>
+                                <h3>♻ Mixed Plastic</h3>
+
+                                <p>
+                                    35 kg available
+                                </p>
+
+                                <div class="progress">
+                                    <span style="width:45%"></span>
+                                </div>
+
+                            </div>
+
+                            <strong>35 kg</strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ================= RECYCLER OFFERS ================= -->
+
+                <div id="offers" class="page">
+
+                    <div class="page-heading">
+
+                        <div>
+                            <h2>Recycler Offers</h2>
+
+                            <p>
+                                Review offers from recyclers.
+                            </p>
+                        </div>
+
+                    </div>
+
+
+                    <div class="card">
+
+                        <div class="offer-card">
+
+                            <div>
+                                <h3>
+                                    EcoRecycle Pvt. Ltd.
+                                </h3>
+
+                                <p>
+                                    LOT-1024 · PCB · 25 kg
+                                </p>
+                            </div>
+
+                            <strong class="price">
+                                ₹420/kg
+                            </strong>
+
+                            <button class="primary"
+                                onclick="acceptOffer('EcoRecycle Pvt. Ltd.')">
+                                Accept Offer
+                            </button>
+
+                        </div>
+
+
+                        <div class="offer-card">
+
+                            <div>
+                                <h3>
+                                    Green Earth Recyclers
+                                </h3>
+
+                                <p>
+                                    LOT-1025 · Cable · 40 kg
+                                </p>
+                            </div>
+
+                            <strong class="price">
+                                ₹310/kg
+                            </strong>
+
+                            <button class="primary"
+                                onclick="acceptOffer('Green Earth Recyclers')">
+                                Accept Offer
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ================= HANDOVER ================= -->
+
+                <div id="handover" class="page">
+
+                    <div class="page-heading">
+
+                        <div>
+                            <h2>Handover</h2>
+
+                            <p>
+                                Manage material transfer to recyclers.
+                            </p>
+                        </div>
+
+                        <button class="primary"
+                            onclick="showToast('Handover form opened')">
+                            + Create Handover
+                        </button>
+
+                    </div>
+
+
+                    <div class="card">
+
+                        <div class="table-container">
+
+                            <table>
+
+                                <thead>
+
+                                    <tr>
+                                        <th>Handover ID</th>
+                                        <th>Lot</th>
+                                        <th>Recycler</th>
+                                        <th>Material</th>
+                                        <th>Weight</th>
+                                        <th>Status</th>
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody>
+
+                                    <tr>
+
+                                        <td>HND-501</td>
+                                        <td>LOT-1020</td>
+                                        <td>EcoRecycle Pvt. Ltd.</td>
+                                        <td>PCB</td>
+                                        <td>20 kg</td>
+
+                                        <td>
+                                            <span class="status received">
+                                                Completed
+                                            </span>
+                                        </td>
+
+                                    </tr>
+
+
+                                    <tr>
+
+                                        <td>HND-502</td>
+                                        <td>LOT-1021</td>
+                                        <td>Green Earth Recyclers</td>
+                                        <td>Cable</td>
+                                        <td>30 kg</td>
+
+                                        <td>
+                                            <span class="status pending">
+                                                Ready
+                                            </span>
+                                        </td>
+
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ================= TRANSACTIONS ================= -->
+
+                <div id="transactions" class="page">
+
+                    <div class="page-heading">
+
+                        <div>
+                            <h2>Transactions</h2>
+
+                            <p>
+                                Financial transaction records.
+                            </p>
+                        </div>
+
+                        <button class="secondary"
+                            onclick="showToast('Transactions exported')">
+                            ⇩ Export
+                        </button>
+
+                    </div>
+
+
+                    <div class="stats">
+
+                        <div class="stat-card">
+                            <span>Total Value</span>
+                            <h2>₹21,380</h2>
+                        </div>
+
+                        <div class="stat-card">
+                            <span>Completed</span>
+                            <h2>3</h2>
+                        </div>
+
+                        <div class="stat-card">
+                            <span>Payment</span>
+                            <h2>UPI</h2>
+                        </div>
+
+                        <div class="stat-card">
+                            <span>Traceability</span>
+                            <h2>100%</h2>
+                        </div>
+
+                    </div>
+
+
+                    <div class="card">
+
+                        <div class="table-container">
+
+                            <table>
+
+                                <thead>
+
+                                    <tr>
+                                        <th>Transaction</th>
+                                        <th>Lot</th>
+                                        <th>Recycler</th>
+                                        <th>Material</th>
+                                        <th>Weight</th>
+                                        <th>Rate</th>
+                                        <th>Total</th>
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody>
+
+                                    <tr>
+                                        <td>TXN-2001</td>
+                                        <td>LOT-1020</td>
+                                        <td>EcoRecycle Pvt. Ltd.</td>
+                                        <td>PCB</td>
+                                        <td>20 kg</td>
+                                        <td>₹410/kg</td>
+                                        <td>₹8,200</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>TXN-2002</td>
+                                        <td>LOT-1019</td>
+                                        <td>Green Earth Recyclers</td>
+                                        <td>Cable</td>
+                                        <td>30 kg</td>
+                                        <td>₹300/kg</td>
+                                        <td>₹9,000</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>TXN-2003</td>
+                                        <td>LOT-1018</td>
+                                        <td>Maharashtra E-Waste</td>
+                                        <td>Battery</td>
+                                        <td>22 kg</td>
+                                        <td>₹190/kg</td>
+                                        <td>₹4,180</td>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ================= PROFILE ================= -->
+
+                <div id="profile" class="page">
+
+                    <div class="page-heading">
+
+                        <div>
+                            <h2>Aggregator Profile</h2>
+
+                            <p>
+                                Account and organization information.
+                            </p>
+                        </div>
+
+                        <button class="primary"
+                            onclick="saveProfile()">
+                            Save Changes
+                        </button>
+
+                    </div>
+
+
+                    <div class="card profile-card">
+
+                        <div class="profile-avatar">
+                            RP
+                        </div>
+
+                        <h2>Rahul Patil</h2>
+
+                        <p>
+                            Aggregator · AGG-001
+                        </p>
+
+                        <span class="status received">
+                            ● Verified
+                        </span>
+
+                    </div>
+
+
+                    <div class="card">
+
+                        <h3>Profile Information</h3>
+
+                        <label>Full Name</label>
+                        <input value="Rahul Patil">
+
+
+                        <label>Phone</label>
+                        <input value="9876543210">
+
+
+                        <label>Location</label>
+                        <input value="Rajur">
+
+
+                        <label>Aggregator ID</label>
+                        <input value="AGG-001" disabled>
+
+
+                        <label>Email</label>
+                        <input value="rahul@example.com">
+
+                    </div>
+
+                </div>
+
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <!-- TOAST -->
+
+    <div id="toast" class="toast">
+        Message
+    </div>
+
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
