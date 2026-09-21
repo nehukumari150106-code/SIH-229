@@ -71,13 +71,16 @@ function PickupDetails({ navigation, route }) {
       <Text style={styles.note}>
         A collector will review and accept your pickup request soon.
       </Text>
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate('CustomerDashboard')}
-      >
-        <Text style={styles.buttonText}>Back to Dashboard</Text>
-      </TouchableOpacity>
+<TouchableOpacity
+  style={styles.button}
+  onPress={() =>
+    navigation.navigate('PickupTracking', {
+      pickup: pickup,
+    })
+  }
+>
+  <Text style={styles.buttonText}>Track Pickup</Text>
+</TouchableOpacity>
     </ScrollView>
   );
 }
