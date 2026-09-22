@@ -27,11 +27,11 @@ export default function AvailableLots({ navigation }) {
       <Text style={styles.detailText}>{item.lot_id}</Text>
       <Text style={styles.detailText}>{item.distance}</Text>
       
-      <TouchableOpacity 
+    <TouchableOpacity 
         style={styles.primaryButton}
-        onPress={() => navigation.navigate('MakeOffer', { lot: item })}
+        onPress={() => navigation.navigate('LotDetails', { lot: item })}
       >
-        <Text style={styles.buttonText}>View & Make Offer</Text>
+        <Text style={styles.buttonText}>View Details</Text>
       </TouchableOpacity>
     </View>
   );
