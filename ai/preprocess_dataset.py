@@ -158,8 +158,14 @@ def split_items(items):
         items[val_end:]
     )
 
+def copy_split(items, class_name, prefix, max_items=None):
+    items = list(items)
 
-def copy_split(items, class_name, prefix):
+    # Limit oversized classes before splitting
+    if max_items is not None and len(items) > max_items:
+        random.shuffle(items)
+        items = items[:max_items]
+
     train, val, test = split_items(items)
 
     for index, source in enumerate(train):
@@ -189,8 +195,7 @@ def copy_split(items, class_name, prefix):
         f"{len(val)} val, "
         f"{len(test)} test"
     )
-
-
+    
 def crop_yolo_image(image_path, label_path, class_name, counter):
     results = []
 
@@ -269,8 +274,6 @@ def crop_yolo_image(image_path, label_path, class_name, counter):
         object_number += 1
 
     return results
-
-
 # ============================================================
 # 6. PROCESS ROBOFLOW
 # ============================================================
@@ -330,13 +333,19 @@ for class_name in [
     "Other",
 ]:
 
-    copy_split(
-        roboflow_crops[class_name],
-        class_name,
-        "roboflow"
-    )
-
-
+    if class_name == "Other":
+        copy_split(
+            roboflow_crops[class_name],
+            class_name,
+            "roboflow",
+            max_items=600
+        )
+    else:
+        copy_split(
+            roboflow_crops[class_name],
+            class_name,
+            "roboflow"
+        )
 # ============================================================
 # 8. LAPTOP COMPONENTS
 # ============================================================
@@ -378,7 +387,8 @@ plastic_images = get_images(PLASTIC)
 copy_split(
     plastic_images,
     "Mixed_Plastic",
-    "plastic"
+    "plastic",
+    max_items=600
 )
 
 
