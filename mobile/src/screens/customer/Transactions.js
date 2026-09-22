@@ -13,20 +13,22 @@ function Transactions({ navigation }) {
   // Later this will come from the backend.
   const transactions = [
     {
-      transaction_id: 'TRX-001',
-      material: 'LCD',
-      actual_weight: 5,
-      price: 90,
-      total_amount: 450,
-      status: 'paid',
-      date: '21 Sep 2026',
-    },
+  transaction_id: 'TRX-001',
+  material: 'LCD',
+  actual_weight: 5,
+  price: 90,
+  total_amount: 450,
+  payment_method: 'UPI',
+  status: 'paid',
+  date: '21 Sep 2026',
+},
     {
       transaction_id: 'TRX-002',
       material: 'PCB',
       actual_weight: 3,
       price: 120,
       total_amount: 360,
+      payment_method:'Cash',
       status: 'paid',
       date: '18 Sep 2026',
     },
@@ -101,6 +103,13 @@ function Transactions({ navigation }) {
             </View>
 
           </View>
+          <View style={styles.paymentRow}>
+  <Text style={styles.paymentLabel}>Paid Via</Text>
+
+  <Text style={styles.paymentValue}>
+    {transaction.payment_method}
+  </Text>
+</View>
 
           <View style={styles.bottomRow}>
             <Text style={styles.date}>
@@ -124,6 +133,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F7F9F8',
   },
+  paymentRow: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  marginTop: 14,
+},
+
+paymentLabel: {
+  fontSize: 12,
+  color: '#5F6B65',
+  marginRight: 6,
+},
+
+paymentValue: {
+  fontSize: 13,
+  fontWeight: '600',
+  color: '#17201C',
+},
 
   content: {
     padding: 20,
