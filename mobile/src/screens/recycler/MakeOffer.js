@@ -1,17 +1,33 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { submitOffer } from '../../services/api';
 
 export default function MakeOffer({ route, navigation }) {
-  const lot = route?.params?.lot || { lot_id: 'LOT-1024', weight: '25 kg', material: 'PCB' };
+  const lot = route?.params?.lot || { lot_id: 'LOT-1024', material: 'PCB', actual_weight: '25' };
   const [offerPrice, setOfferPrice] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmitOffer = () => {
+  const handleSubmitOffer = async () => {
     if (!offerPrice) {
       Alert.alert('Error', 'Please enter a price per kg.');
       return;
     }
-    Alert.alert('Success', `Offer of ₹${offerPrice}/kg submitted for ${lot.lot_id}`);
-    navigation.goBack();
+
+    setSubmitting(true);
+    try {
+      await submitOffer({
+        lot_id: lot.lot_id,
+        recycler_id: 'REC-001',
+        price_per_kg: parseFloat(offerPrice)
+      });
+      Alert.alert('Success', `Offer submitted successfully for ${lot.lot_id}`);
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert('Notice', 'Backend offline. Offer simulated locally.');
+      navigation.goBack();
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -20,7 +36,7 @@ export default function MakeOffer({ route, navigation }) {
       <View style={styles.card}>
         <Text style={styles.detailText}>Lot: {lot.lot_id}</Text>
         <Text style={styles.detailText}>Material: {lot.material}</Text>
-        <Text style={styles.detailText}>Weight: {lot.weight}</Text>
+        <Text style={styles.detailText}>Weight: {lot.actual_weight} kg</Text>
         
         <Text style={styles.inputLabel}>Your Offer (₹/kg):</Text>
         <TextInput 
@@ -29,9 +45,19 @@ export default function MakeOffer({ route, navigation }) {
           placeholder="e.g. 400"
           value={offerPrice}
           onChangeText={setOfferPrice}
+          editable={!submitting}
         />
-        <TouchableOpacity style={styles.primaryButton} onPress={handleSubmitOffer}>
-          <Text style={styles.buttonText}>Submit Offer</Text>
+        
+        <TouchableOpacity 
+          style={styles.primaryButton} 
+          onPress={handleSubmitOffer}
+          disabled={submitting}
+        >
+          {submitting ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text style={styles.buttonText}>Submit Offer</Text>
+          )}
         </TouchableOpacity>
       </View>
     </View>
