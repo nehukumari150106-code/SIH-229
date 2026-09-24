@@ -78,12 +78,6 @@ function TransactionDetails({ navigation, route }) {
             ₹{transaction.price} / kg
           </Text>
         </View>
-        <View style={styles.detailRow}>
-  <Text style={styles.label}>Paid Via</Text>
-  <Text style={styles.value}>
-    {transaction.payment_method}
-  </Text>
-</View>
 
         <View style={styles.detailRow}>
           <Text style={styles.label}>Transaction Date</Text>

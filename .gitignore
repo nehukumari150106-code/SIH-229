@@ -1,0 +1,20 @@
+# Dependencies
+mobile/node_modules/
+
+# Android generated files
+mobile/android/.gradle/
+mobile/android/build/
+mobile/android/app/build/
+mobile/android/.cxx/
+
+# Generated Android binaries
+*.apk
+*.aab
+*.so
+
+# Metro
+mobile/.metro/
+mobile/.metro-health-check*
+
+# Logs
+*.log
