@@ -1,19 +1,16 @@
-# AI API Contract
+# AI Service API Contract
 
 ## Endpoint
-
-POST /analyze
+`POST /analyze`
 
 ## Input
+`multipart/form-data`
+- `image`: Uploaded image file (e-waste object or scene)
 
-Multipart form-data:
-
-- image: uploaded scrap/e-waste image
-
-## Output
-
+## Output Response (200 OK)
 ```json
 {
-  "material": "PCB",
-  "confidence": 0.91
+  "category": "TV_MONITOR",
+  "confidence": 0.8942,
+  "low_confidence_flag": false
 }

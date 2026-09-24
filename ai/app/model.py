@@ -3,102 +3,69 @@ from torchvision import models, transforms
 from PIL import Image
 from pathlib import Path
 
-
-# ============================================================
-# 1. MATERIAL CLASSES
-# ============================================================
-
-MATERIALS = [
-    "Battery",
-    "CRT",
-    "Cable",
-    "LCD",
-    "Mixed_Plastic",
-    "Other",
-    "PCB"
+# Match class list alphabetical ordering (PyTorch ImageFolder defaults to alphabetical)
+CATEGORIES = [
+    "CABLE_WIRE",
+    "COMPUTER_LAPTOP",
+    "FRIDGE_AC",
+    "MOBILE_TABLET",
+    "NOT_SURE",
+    "OTHER_ELECTRONICS",
+    "TV_MONITOR",
+    "WASHING_APPLIANCE"
 ]
-
-
-# ============================================================
-# 2. DEVICE
-# ============================================================
 
 device = torch.device("cpu")
 
-
-# ============================================================
-# 3. MODEL
-# ============================================================
-
+# Model Initialization
 model = models.mobilenet_v3_small(weights=None)
-
 model.classifier[3] = torch.nn.Linear(
     model.classifier[3].in_features,
-    len(MATERIALS)
+    len(CATEGORIES)
 )
 
+MODEL_PATH = Path(__file__).resolve().parents[1] / "models" / "mobilenet_v3_small.pth"
 
-# ============================================================
-# 4. LOAD TRAINED WEIGHTS
-# ============================================================
-
-MODEL_PATH = (
-    Path(__file__).resolve().parents[1]
-    / "models"
-    / "mobilenet_v3_small.pth"
-)
-
-model.load_state_dict(
-    torch.load(
-        MODEL_PATH,
-        map_location=device
-    )
-)
+if MODEL_PATH.exists():
+    model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
 
 model = model.to(device)
 model.eval()
 
-
-# ============================================================
-# 5. IMAGE PREPROCESSING
-# ============================================================
-
+# Standard ImageNet Transforms
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
+    transforms.Normalize(
+        mean=[0.485, 0.456, 0.406],
+        std=[0.229, 0.224, 0.225]
+    )
 ])
 
+CONFIDENCE_THRESHOLD = 0.60
 
-# ============================================================
-# 6. PREDICTION
-# ============================================================
-
-def predict(image: Image.Image):
-
+def predict(image: Image.Image) -> dict:
     image = image.convert("RGB")
-
-    image = transform(image)
-
-    image = image.unsqueeze(0).to(device)
+    tensor_image = transform(image).unsqueeze(0).to(device)
 
     with torch.no_grad():
+        output = model(tensor_image)
+        probabilities = torch.softmax(output, dim=1)
+        confidence, index = torch.max(probabilities, dim=1)
 
-        output = model(image)
+    score = round(confidence.item(), 4)
+    predicted_category = CATEGORIES[index.item()]
 
-        probabilities = torch.softmax(
-            output,
-            dim=1
-        )
-
-        confidence, index = torch.max(
-            probabilities,
-            dim=1
-        )
+    # Fallback trigger if confidence is below operating threshold
+    if score < CONFIDENCE_THRESHOLD:
+        return {
+            "category": "NOT_SURE",
+            "confidence": score,
+            "low_confidence_flag": True
+        }
 
     return {
-        "material": MATERIALS[index.item()],
-        "confidence": round(
-            confidence.item(),
-            4
-        )
+        "category": predicted_category,
+        "confidence": score,
+        "low_confidence_flag": False
     }

@@ -11,7 +11,7 @@ from PIL import Image
 REPO = Path(r"C:\Users\sandi\C Tutorials\New folder\VS CODE FILES\SIH-229")
 
 ROBOFLOW = Path(
-    r"C:\Users\sandi\Downloads\E-Waste Dataset.v44-fix-annotations-of-some-bar-phones-incorrectly-labelled-as-smartphones.yolov8"
+    r"C:\Users\sandi\Downloads\E-Waste Dataset.v1i.yolov8"
 )
 
 LAPTOP = Path(
@@ -24,83 +24,60 @@ PLASTIC = Path(
     r"C:\Users\sandi\Downloads\archive\standardized_384\plastic"
 )
 
+# Directory containing non-electronic background images (cardboard, shoes, bottles, etc.)
+NON_EWASTE_PATH = Path(
+    r"C:\Users\sandi\C Tutorials\New folder\VS CODE FILES\SIH-229\data\non_ewaste_dataset"
+)
 OUTPUT = REPO / "ai" / "dataset"
 
 
 # ============================================================
-# 2. TARGET CLASSES
+# 2. TARGET CLASSES & ROBOFLOW ID MAPPINGS
 # ============================================================
 
 CLASSES = [
-    "PCB",
-    "Cable",
-    "Battery",
-    "CRT",
-    "LCD",
-    "Mixed_Plastic",
-    "Other",
+    "CABLE_WIRE",          # Index 0
+    "COMPUTER_LAPTOP",     # Index 1
+    "FRIDGE_AC",           # Index 2
+    "MOBILE_TABLET",       # Index 3
+    "NOT_SURE",            # Index 4
+    "OTHER_ELECTRONICS",   # Index 5
+    "TV_MONITOR",          # Index 6
+    "WASHING_APPLIANCE"    # Index 7           
 ]
 
-
-# Roboflow class IDs from data.yml
+# Roboflow class IDs directly mapped to target categories
 ROBOFLOW_CLASSES = {
-    2: "Battery",
-
-    5: "CRT",
-    6: "CRT",
-
-    29: "LCD",
-    30: "LCD",
-
-    45: "PCB",
+    # TV_MONITOR
+    5: "TV_MONITOR", 6: "TV_MONITOR", 29: "TV_MONITOR", 30: "TV_MONITOR",
+    
+    # COMPUTER_LAPTOP
+    14: "COMPUTER_LAPTOP", 15: "COMPUTER_LAPTOP", 19: "COMPUTER_LAPTOP", 
+    38: "COMPUTER_LAPTOP", 50: "COMPUTER_LAPTOP", 56: "COMPUTER_LAPTOP", 58: "COMPUTER_LAPTOP",
+    
+    # MOBILE_TABLET
+    1: "MOBILE_TABLET", 60: "MOBILE_TABLET", 69: "MOBILE_TABLET",
+    
+    # FRIDGE_AC (Added additional UNU-Key IDs for fridges/coolers)
+    0: "FRIDGE_AC", 3: "FRIDGE_AC", 4: "FRIDGE_AC", 32: "FRIDGE_AC",
+    
+    # WASHING_APPLIANCE
+    11: "WASHING_APPLIANCE", 12: "WASHING_APPLIANCE", 34: "WASHING_APPLIANCE", 
+    44: "WASHING_APPLIANCE", 71: "WASHING_APPLIANCE", 72: "WASHING_APPLIANCE", 
+    74: "WASHING_APPLIANCE", 75: "WASHING_APPLIANCE",
+    
+    # CABLE_WIRE (Added wiring/cable class extensions)
+    10: "CABLE_WIRE", 48: "CABLE_WIRE", 49: "CABLE_WIRE",
+    
+    # OTHER_ELECTRONICS
+    2: "OTHER_ELECTRONICS", 7: "OTHER_ELECTRONICS", 8: "OTHER_ELECTRONICS", 
+    20: "OTHER_ELECTRONICS", 22: "OTHER_ELECTRONICS", 24: "OTHER_ELECTRONICS", 
+    26: "OTHER_ELECTRONICS", 28: "OTHER_ELECTRONICS", 36: "OTHER_ELECTRONICS", 
+    40: "OTHER_ELECTRONICS", 42: "OTHER_ELECTRONICS", 45: "OTHER_ELECTRONICS", 
+    51: "OTHER_ELECTRONICS", 59: "OTHER_ELECTRONICS", 61: "OTHER_ELECTRONICS", 
+    62: "OTHER_ELECTRONICS", 63: "OTHER_ELECTRONICS", 67: "OTHER_ELECTRONICS", 
+    68: "OTHER_ELECTRONICS", 73: "OTHER_ELECTRONICS", 76: "OTHER_ELECTRONICS"
 }
-
-
-# Miscellaneous Roboflow classes used for Other
-OTHER_IDS = {
-    0,   # Air-Conditioner
-    1,   # Bar-Phone
-    7,   # Calculator
-    8,   # Camera
-    11,  # Clothes-Iron
-    12,  # Coffee-Machine
-    14,  # Computer-Keyboard
-    15,  # Computer-Mouse
-    19,  # Desktop-PC
-    20,  # Digital-Oscilloscope
-    22,  # Drone
-    24,  # Electric-Guitar
-    26,  # Electronic-Keyboard
-    28,  # Flashlight
-    32,  # Freezer
-    34,  # Hair-Dryer
-    36,  # Headphone
-    38,  # Laptop
-    40,  # Music-Player
-    42,  # Network-Switch
-    44,  # Oven
-    49,  # Power-Adapter
-    50,  # Printer
-    51,  # Projector
-    56,  # Router
-    58,  # Server
-    59,  # Smart-Watch
-    60,  # Smartphone
-    61,  # Smoke-Detector
-    62,  # Soldering-Iron
-    63,  # Speaker
-    67,  # TV-Remote-Control
-    68,  # Table-Lamp
-    69,  # Tablet
-    71,  # Toaster
-    72,  # Tumble-Dryer
-    73,  # USB-Flash-Drive
-    74,  # Vacuum-Cleaner
-    75,  # Washing-Machine
-    76,  # Xbox-Series-X
-}
-
-
 # ============================================================
 # 3. SETTINGS
 # ============================================================
@@ -158,6 +135,7 @@ def split_items(items):
         items[val_end:]
     )
 
+
 def copy_split(items, class_name, prefix, max_items=None):
     items = list(items)
 
@@ -190,12 +168,13 @@ def copy_split(items, class_name, prefix, max_items=None):
         shutil.copy2(source, destination)
 
     print(
-        f"{class_name}: "
+        f"{class_name} ({prefix}): "
         f"{len(train)} train, "
         f"{len(val)} val, "
         f"{len(test)} test"
     )
-    
+
+
 def crop_yolo_image(image_path, label_path, class_name, counter):
     results = []
 
@@ -232,13 +211,10 @@ def crop_yolo_image(image_path, label_path, class_name, counter):
         except ValueError:
             continue
 
-        if class_id not in ROBOFLOW_CLASSES and class_id not in OTHER_IDS:
+        if class_id not in ROBOFLOW_CLASSES:
             continue
 
-        if class_id in ROBOFLOW_CLASSES:
-            target = ROBOFLOW_CLASSES[class_id]
-        else:
-            target = "Other"
+        target = ROBOFLOW_CLASSES[class_id]
 
         if target != class_name:
             continue
@@ -274,15 +250,27 @@ def crop_yolo_image(image_path, label_path, class_name, counter):
         object_number += 1
 
     return results
+
+
 # ============================================================
-# 6. PROCESS ROBOFLOW
+# 6. PROCESS ROBOFLOW DATASET
 # ============================================================
 
 print("\nProcessing Roboflow dataset...")
 
+roboflow_target_classes = [
+    "TV_MONITOR",
+    "COMPUTER_LAPTOP",
+    "MOBILE_TABLET",
+    "FRIDGE_AC",
+    "WASHING_APPLIANCE",
+    "CABLE_WIRE",
+    "OTHER_ELECTRONICS"
+]
+
 roboflow_crops = {
     class_name: []
-    for class_name in CLASSES
+    for class_name in roboflow_target_classes
 }
 
 counter = 0
@@ -300,13 +288,7 @@ for split in ["train", "valid", "test"]:
 
         label_path = label_dir / f"{image_path.stem}.txt"
 
-        for class_name in [
-            "PCB",
-            "Battery",
-            "CRT",
-            "LCD",
-            "Other",
-        ]:
+        for class_name in roboflow_target_classes:
             crops = crop_yolo_image(
                 image_path,
                 label_path,
@@ -325,20 +307,13 @@ for split in ["train", "valid", "test"]:
 
 print("\nAdding Roboflow crops...")
 
-for class_name in [
-    "PCB",
-    "Battery",
-    "CRT",
-    "LCD",
-    "Other",
-]:
-
-    if class_name == "Other":
+for class_name in roboflow_target_classes:
+    if class_name == "OTHER_ELECTRONICS":
         copy_split(
             roboflow_crops[class_name],
             class_name,
             "roboflow",
-            max_items=600
+            max_items=800
         )
     else:
         copy_split(
@@ -346,50 +321,48 @@ for class_name in [
             class_name,
             "roboflow"
         )
+
+
 # ============================================================
 # 8. LAPTOP COMPONENTS
 # ============================================================
 
 print("\nProcessing Laptop Components...")
 
-battery_images = get_images(LAPTOP / "1. Battery")
 dccable_images = get_images(LAPTOP / "6. DCCable")
 lcd_images = get_images(LAPTOP / "16. LCDScreen")
 lvds_images = get_images(LAPTOP / "26. LVDSCable")
 
 copy_split(
-    battery_images,
-    "Battery",
-    "laptop_battery"
-)
-
-copy_split(
     dccable_images + lvds_images,
-    "Cable",
+    "CABLE_WIRE",
     "laptop_cable"
 )
 
 copy_split(
     lcd_images,
-    "LCD",
+    "TV_MONITOR",
     "laptop_lcd"
 )
 
 
 # ============================================================
-# 9. MIXED PLASTIC
+# 9. NON-EWASTE / NOT_SURE DATASET
 # ============================================================
 
-print("\nProcessing plastic dataset...")
+print("\nProcessing Non-E-Waste images for NOT_SURE...")
 
-plastic_images = get_images(PLASTIC)
+non_ewaste_images = get_images(NON_EWASTE_PATH)
 
-copy_split(
-    plastic_images,
-    "Mixed_Plastic",
-    "plastic",
-    max_items=600
-)
+if non_ewaste_images:
+    copy_split(
+        non_ewaste_images,
+        "NOT_SURE",
+        "non_ewaste",
+        max_items=600
+    )
+else:
+    print(f"WARNING: No non-e-waste images found at path {NON_EWASTE_PATH}. Please populate this path.")
 
 
 # ============================================================
@@ -420,7 +393,7 @@ for split in ["train", "val", "test"]:
 
         count = len(get_images(folder))
 
-        print(f"{class_name:15} {count}")
+        print(f"{class_name:20} {count}")
 
 print("\nDataset creation complete.")
 print(f"Location: {OUTPUT}")
