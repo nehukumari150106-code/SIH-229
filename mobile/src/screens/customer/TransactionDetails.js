@@ -6,18 +6,22 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
+import { getCustomerCategory } from '../../constants/customerCategories';
 
 function TransactionDetails({ navigation, route }) {
 
   const transaction = route?.params?.transaction || {
     transaction_id: 'TRX-001',
-    material: 'LCD',
+    customer_category: 'TV_MONITOR',
     actual_weight: 5,
     price: 90,
     total_amount: 450,
     status: 'paid',
     date: '21 Sep 2026',
   };
+  const category = getCustomerCategory(
+    transaction.customer_category || transaction.material,
+  );
 
   return (
     <ScrollView
@@ -59,9 +63,9 @@ function TransactionDetails({ navigation, route }) {
         </View>
 
         <View style={styles.detailRow}>
-          <Text style={styles.label}>Material</Text>
+          <Text style={styles.label}>Product Category</Text>
           <Text style={styles.value}>
-            {transaction.material}
+            {category.emoji} {category.label}{'\n'}{category.marathiLabel}
           </Text>
         </View>
 

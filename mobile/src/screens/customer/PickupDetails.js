@@ -6,18 +6,20 @@ import {
   ScrollView,
   StyleSheet,
 } from 'react-native';
+import { getCustomerCategory } from '../../constants/customerCategories';
 
 function PickupDetails({ navigation, route }) {
   // This will receive the real pickup later from CreatePickup.
   // Demo data keeps the screen visible while we build and test it.
   const pickup = route?.params?.pickup || {
     pickup_id: 'PICKUP-123456',
-    material: 'PCB',
+    customer_category: 'OTHER_ELECTRONICS',
     estimated_weight: 5,
     location: 'Your saved location',
     preferred_time: '10:00 AM - 12:00 PM',
     status: 'pending',
   };
+  const category = getCustomerCategory(pickup.customer_category || pickup.material);
 
   return (
     <ScrollView
@@ -47,7 +49,7 @@ function PickupDetails({ navigation, route }) {
 
         <View style={styles.detailRow}>
           <Text style={styles.label}>Scrap Category</Text>
-          <Text style={styles.value}>{pickup.material}</Text>
+          <Text style={styles.value}>{category.emoji} {category.label}{'\n'}{category.marathiLabel}</Text>
         </View>
 
         <View style={styles.detailRow}>

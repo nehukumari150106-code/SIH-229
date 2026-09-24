@@ -6,6 +6,7 @@ import {
   ScrollView,
   StyleSheet,
 } from 'react-native';
+import { getCustomerCategory } from '../../constants/customerCategories';
 
 function Transactions({ navigation }) {
 
@@ -14,7 +15,7 @@ function Transactions({ navigation }) {
   const transactions = [
     {
   transaction_id: 'TRX-001',
-  material: 'LCD',
+  customer_category: 'TV_MONITOR',
   actual_weight: 5,
   price: 90,
   total_amount: 450,
@@ -24,7 +25,7 @@ function Transactions({ navigation }) {
 },
     {
       transaction_id: 'TRX-002',
-      material: 'PCB',
+      customer_category: 'OTHER_ELECTRONICS',
       actual_weight: 3,
       price: 120,
       total_amount: 360,
@@ -46,7 +47,11 @@ function Transactions({ navigation }) {
         View your scrap sales and payment history.
       </Text>
 
-      {transactions.map((transaction) => (
+      {transactions.map((transaction) => {
+        const category = getCustomerCategory(
+          transaction.customer_category || transaction.material,
+        );
+        return (
         <TouchableOpacity
           key={transaction.transaction_id}
           style={styles.transactionCard}
@@ -61,7 +66,7 @@ function Transactions({ navigation }) {
 
             <View>
               <Text style={styles.material}>
-                {transaction.material}
+                {category.emoji} {category.label}{'\n'}{category.marathiLabel}
               </Text>
 
               <Text style={styles.transactionId}>
@@ -122,7 +127,8 @@ function Transactions({ navigation }) {
           </View>
 
         </TouchableOpacity>
-      ))}
+        );
+      })}
 
     </ScrollView>
   );

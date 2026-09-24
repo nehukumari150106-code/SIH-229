@@ -6,6 +6,7 @@ import {
   ScrollView,
   StyleSheet,
 } from 'react-native';
+import { getCustomerCategory } from '../../constants/customerCategories';
 
 function MyPickups({ navigation }) {
 
@@ -14,7 +15,7 @@ function MyPickups({ navigation }) {
   const pickups = [
     {
       pickup_id: 'PICKUP-1789928214322',
-      material: 'LCD',
+      customer_category: 'TV_MONITOR',
       estimated_weight: 5,
       location: 'Pune',
       preferred_time: '5 PM',
@@ -22,7 +23,7 @@ function MyPickups({ navigation }) {
     },
     {
       pickup_id: 'PICKUP-1789928107689',
-      material: 'PCB',
+      customer_category: 'OTHER_ELECTRONICS',
       estimated_weight: 3,
       location: 'Pune',
       preferred_time: '10 AM',
@@ -42,7 +43,9 @@ function MyPickups({ navigation }) {
         Track all your scrap pickup requests here.
       </Text>
 
-      {pickups.map((pickup) => (
+      {pickups.map((pickup) => {
+        const category = getCustomerCategory(pickup.customer_category || pickup.material);
+        return (
         <TouchableOpacity
           key={pickup.pickup_id}
           style={styles.pickupCard}
@@ -56,7 +59,7 @@ function MyPickups({ navigation }) {
           <View style={styles.cardTop}>
             <View>
               <Text style={styles.material}>
-                {pickup.material}
+                {category.emoji} {category.label}{'\n'}{category.marathiLabel}
               </Text>
 
               <Text style={styles.pickupId}>
@@ -101,7 +104,8 @@ function MyPickups({ navigation }) {
           </Text>
 
         </TouchableOpacity>
-      ))}
+        );
+      })}
 
     </ScrollView>
   );

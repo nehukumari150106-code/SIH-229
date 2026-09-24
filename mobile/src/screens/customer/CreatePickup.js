@@ -8,23 +8,13 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
+import { CUSTOMER_CATEGORIES } from '../../constants/customerCategories';
 
 function CreatePickup({ navigation }) {
-  const [category, setCategory] = useState('');
+  const [customerCategory, setCustomerCategory] = useState(null);
   const [weight, setWeight] = useState('');
   const [location, setLocation] = useState('');
   const [preferredTime, setPreferredTime] = useState('');
-
-  const categories = [
-    'PCB',
-    'Cable',
-    'Battery',
-    'Motor',
-    'CRT',
-    'LCD',
-    'Mixed Plastic',
-    'Other',
-  ];
 
   return (
     <ScrollView
@@ -38,25 +28,29 @@ function CreatePickup({ navigation }) {
       </Text>
 
       {/* Scrap Category */}
-      <Text style={styles.label}>Scrap Category</Text>
+      <Text style={styles.label}>What do you have?</Text>
 
       <View style={styles.categoryContainer}>
-        {categories.map((item) => (
+        {CUSTOMER_CATEGORIES.map((item) => (
           <TouchableOpacity
-            key={item}
+            key={item.id}
+            accessibilityRole="button"
+            accessibilityLabel={`${item.label}, ${item.marathiLabel}`}
+            accessibilityState={{ selected: customerCategory === item.id }}
             style={[
               styles.categoryButton,
-              category === item && styles.categorySelected,
+              customerCategory === item.id && styles.categorySelected,
             ]}
-            onPress={() => setCategory(item)}
+            onPress={() => setCustomerCategory(item.id)}
           >
+            <Text style={styles.categoryEmoji}>{item.emoji}</Text>
             <Text
               style={[
                 styles.categoryText,
-                category === item && styles.categoryTextSelected,
+                customerCategory === item.id && styles.categoryTextSelected,
               ]}
             >
-              {item}
+              {item.label}{'\n'}{item.marathiLabel}
             </Text>
           </TouchableOpacity>
         ))}
@@ -105,7 +99,7 @@ function CreatePickup({ navigation }) {
       <TouchableOpacity
         style={styles.createButton}
         onPress={() => {
-  if (!category || !weight || !location || !preferredTime) {
+  if (!customerCategory || !weight || !location || !preferredTime) {
     Alert.alert(
       'Missing Information',
       'Please fill in all pickup details.'
@@ -117,7 +111,9 @@ function CreatePickup({ navigation }) {
     pickup_id: `PICKUP-${Date.now()}`,
     customer_id: 'customer_demo',
     collector_id: null,
-    material: category,
+    customer_category: customerCategory,
+    category_confidence: null,
+    photo: null,
     estimated_weight: parseFloat(weight),
     location: location,
     preferred_time: preferredTime,
@@ -131,7 +127,7 @@ function CreatePickup({ navigation }) {
 
   Alert.alert(
     'Pickup Created! 🎉',
-    `Your ${category} pickup request has been created.`,
+    `Your ${CUSTOMER_CATEGORIES.find((item) => item.id === customerCategory).label} pickup request has been created.`,
   );
 }}
       >
@@ -176,19 +172,21 @@ const styles = StyleSheet.create({
   },
 
   categoryContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
+    flexDirection: 'column',
+    gap: 12,
     marginBottom: 15,
   },
 
   categoryButton: {
-    paddingVertical: 11,
-    paddingHorizontal: 15,
-    borderRadius: 10,
+    minHeight: 88,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 14,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#D8E1DC',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 
   categorySelected: {
@@ -198,12 +196,21 @@ const styles = StyleSheet.create({
 
   categoryText: {
     color: '#17201C',
-    fontSize: 13,
+    fontSize: 16,
+    fontWeight: '600',
+    lineHeight: 24,
+    marginLeft: 14,
   },
 
   categoryTextSelected: {
     color: '#FFFFFF',
     fontWeight: '600',
+  },
+
+  categoryEmoji: {
+    fontSize: 34,
+    width: 44,
+    textAlign: 'center',
   },
 
   photoButton: {
