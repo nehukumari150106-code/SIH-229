@@ -1,203 +1,140 @@
-from pathlib import Path
+import os
 import torch
-from torch import nn, optim
-from torch.utils.data import DataLoader
+import torch.nn as nn
+import torch.optim as optim
 from torchvision import datasets, models, transforms
+from torch.utils.data import DataLoader
+from pathlib import Path
 
-# ============================================================
-# 1. CONFIGURATION & PATHS (DYNAMIC RESOLUTION)
-# ============================================================
+def main():
+    # ==========================================
+    # 1. CONFIGURATION & PATHS
+    # ==========================================
+    TRAIN_DIR = Path("ai/dataset/train")
+    VAL_DIR = Path("ai/dataset/val")
+    MODEL_SAVE_PATH = Path("ai/models/mobilenet_v3_e_waste.pth")
 
-BASE_DIR = Path(__file__).resolve().parent
-DATASET = BASE_DIR / "dataset"
-MODEL_OUTPUT = BASE_DIR / "models" / "mobilenet_v3_small.pth"
+    BATCH_SIZE = 32
+    NUM_EPOCHS = 15
+    LEARNING_RATE = 0.0003
+    NUM_CLASSES = 8
 
-BATCH_SIZE = 32
-EPOCHS = 15
-LEARNING_RATE = 0.0005
+    os.makedirs("ai/models", exist_ok=True)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"[+] Running training on device: {device}")
 
-# Automatically leverage CUDA GPU if available, otherwise default to CPU
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"Using device: {DEVICE}")
-print(f"Target dataset path: {DATASET}")
+    # ==========================================
+    # 2. DATA AUGMENTATION & LOADERS
+    # ==========================================
+    train_transforms = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomRotation(15),
+        transforms.ColorJitter(brightness=0.2, contrast=0.2),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ])
 
+    val_transforms = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ])
 
-# ============================================================
-# 2. TRANSFORMS
-# ============================================================
+    train_dataset = datasets.ImageFolder(root=str(TRAIN_DIR), transform=train_transforms)
+    val_dataset = datasets.ImageFolder(root=str(VAL_DIR), transform=val_transforms)
 
-train_transform = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.RandomHorizontalFlip(),
-    transforms.RandomRotation(15),
-    transforms.ColorJitter(brightness=0.2, contrast=0.2),
-    transforms.ToTensor(),
-    transforms.Normalize(
-        mean=[0.485, 0.456, 0.406],
-        std=[0.229, 0.224, 0.225]
-    )
-])
+    # Set num_workers=0 to completely prevent Windows multiprocessing crashes on CPU
+    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=0)
+    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=0)
 
-val_test_transform = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.ToTensor(),
-    transforms.Normalize(
-        mean=[0.485, 0.456, 0.406],
-        std=[0.229, 0.224, 0.225]
-    )
-])
+    print(f"[+] Classes detected ({len(train_dataset.classes)}): {train_dataset.classes}")
 
+    # ==========================================
+    # 3. DYNAMIC INVERSE CLASS WEIGHTS
+    # ==========================================
+    class_counts = []
+    for cls_name in train_dataset.classes:
+        cls_path = TRAIN_DIR / cls_name
+        count = len(list(cls_path.glob("*.*"))) if cls_path.exists() else 1
+        class_counts.append(count)
 
-# ============================================================
-# 3. DATASETS & DATALOADERS
-# ============================================================
+    total_samples = sum(class_counts)
+    class_weights = [total_samples / c for c in class_counts]
+    weights_tensor = torch.FloatTensor(class_weights).to(device)
 
-train_dataset = datasets.ImageFolder(
-    DATASET / "train",
-    transform=train_transform
-)
-val_dataset = datasets.ImageFolder(
-    DATASET / "val",
-    transform=val_test_transform
-)
-test_dataset = datasets.ImageFolder(
-    DATASET / "test",
-    transform=val_test_transform
-)
+    print(f"[+] Computed Class Weights: {[round(w, 2) for w in class_weights]}")
 
-print("\nDetected Classes (Alphabetical):", train_dataset.classes)
-print("Class Mapping:", train_dataset.class_to_idx)
-print(f"Total Samples -> Train: {len(train_dataset)} | Val: {len(val_dataset)} | Test: {len(test_dataset)}\n")
+    # ==========================================
+    # 4. MODEL INITIALIZATION & LOSS
+    # ==========================================
+    model = models.mobilenet_v3_small(weights=models.MobileNet_V3_Small_Weights.DEFAULT)
+    model.classifier[3] = nn.Linear(model.classifier[3].in_features, NUM_CLASSES)
+    model = model.to(device)
 
-train_loader = DataLoader(
-    train_dataset,
-    batch_size=BATCH_SIZE,
-    shuffle=True,
-    num_workers=0,  # Set to 0 for Windows CPU compatibility
-    pin_memory=True if DEVICE.type == "cuda" else False
-)
-val_loader = DataLoader(
-    val_dataset,
-    batch_size=BATCH_SIZE,
-    shuffle=False,
-    num_workers=0,
-    pin_memory=True if DEVICE.type == "cuda" else False
-)
-test_loader = DataLoader(
-    test_dataset,
-    batch_size=BATCH_SIZE,
-    shuffle=False,
-    num_workers=0,
-    pin_memory=True if DEVICE.type == "cuda" else False
-)
+    criterion = nn.CrossEntropyLoss(weight=weights_tensor)
+    optimizer = optim.AdamW(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
 
+    # ==========================================
+    # 5. TRAINING LOOP
+    # ==========================================
+    best_val_acc = 0.0
 
-# ============================================================
-# 4. MODEL INITIALIZATION
-# ============================================================
-
-model = models.mobilenet_v3_small(weights="DEFAULT")
-
-# Replace classifier head for 8 classes
-num_classes = len(train_dataset.classes)
-model.classifier[3] = nn.Linear(model.classifier[3].in_features, num_classes)
-model = model.to(DEVICE)
-
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.AdamW(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
-
-# Decay learning rate by 0.5 every 5 epochs
-scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.5)
-
-
-# ============================================================
-# 5. TRAINING & VALIDATION LOOP
-# ============================================================
-
-best_val_acc = 0.0
-MODEL_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-
-print("Starting Model Training...\n" + "=" * 60)
-
-for epoch in range(EPOCHS):
-    # Training Phase
-    model.train()
-    running_loss, correct, total = 0.0, 0, 0
-
-    for images, labels in train_loader:
-        images, labels = images.to(DEVICE), labels.to(DEVICE)
-
-        optimizer.zero_grad()
-        outputs = model(images)
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
-
-        running_loss += loss.item()
-        _, predicted = torch.max(outputs, 1)
-        total += labels.size(0)
-        correct += (predicted == labels).sum().item()
-
-    train_accuracy = 100 * correct / total
-    avg_train_loss = running_loss / len(train_loader)
-
-    # Validation Phase
-    model.eval()
-    val_correct, val_total, val_running_loss = 0, 0, 0.0
-
-    with torch.no_grad():
-        for images, labels in val_loader:
-            images, labels = images.to(DEVICE), labels.to(DEVICE)
-            outputs = model(images)
+    for epoch in range(NUM_EPOCHS):
+        print(f"\n--- Epoch {epoch+1}/{NUM_EPOCHS} ---")
+        
+        # --- Training Phase ---
+        model.train()
+        running_loss = 0.0
+        correct = 0
+        total = 0
+        
+        for inputs, labels in train_loader:
+            inputs, labels = inputs.to(device), labels.to(device)
+            
+            optimizer.zero_grad()
+            outputs = model(inputs)
             loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+            
+            running_loss += loss.item() * inputs.size(0)
+            _, preds = torch.max(outputs, 1)
+            correct += torch.sum(preds == labels.data)
+            total += labels.size(0)
+            
+        train_loss = running_loss / total
+        train_acc = correct.double() / total
+        print(f"Train Loss: {train_loss:.4f} | Train Acc: {train_acc:.4f}")
+        
+        # --- Validation Phase ---
+        model.eval()
+        val_loss = 0.0
+        val_correct = 0
+        val_total = 0
+        
+        with torch.no_grad():
+            for inputs, labels in val_loader:
+                inputs, labels = inputs.to(device), labels.to(device)
+                outputs = model(inputs)
+                loss = criterion(outputs, labels)
+                
+                val_loss += loss.item() * inputs.size(0)
+                _, preds = torch.max(outputs, 1)
+                val_correct += torch.sum(preds == labels.data)
+                val_total += labels.size(0)
+                
+        epoch_val_loss = val_loss / val_total
+        epoch_val_acc = val_correct.double() / val_total
+        print(f"Val Loss:   {epoch_val_loss:.4f} | Val Acc:   {epoch_val_acc:.4f}")
+        
+        # Save best model checkpoint
+        if epoch_val_acc > best_val_acc:
+            best_val_acc = epoch_val_acc
+            torch.save(model.state_dict(), MODEL_SAVE_PATH)
+            print(f" [✓] Best model saved to {MODEL_SAVE_PATH} (Acc: {best_val_acc:.4f})")
 
-            val_running_loss += loss.item()
-            _, predicted = torch.max(outputs, 1)
-            val_total += labels.size(0)
-            val_correct += (predicted == labels).sum().item()
+    print(f"\n[✓] Training complete! Highest Validation Accuracy: {best_val_acc:.4f}")
 
-    val_accuracy = 100 * val_correct / val_total
-    avg_val_loss = val_running_loss / len(val_loader)
-
-    # Step learning rate scheduler
-    scheduler.step()
-
-    # Save best performing checkpoint
-    saved_flag = ""
-    if val_accuracy > best_val_acc:
-        best_val_acc = val_accuracy
-        torch.save(model.state_dict(), MODEL_OUTPUT)
-        saved_flag = " --> [BEST MODEL SAVED]"
-
-    print(
-        f"Epoch {epoch + 1:02d}/{EPOCHS} | "
-        f"Train Loss: {avg_train_loss:.4f} | Train Acc: {train_accuracy:.2f}% | "
-        f"Val Loss: {avg_val_loss:.4f} | Val Acc: {val_accuracy:.2f}%"
-        f"{saved_flag}"
-    )
-
-
-# ============================================================
-# 6. FINAL TEST EVALUATION
-# ============================================================
-
-print("=" * 60)
-print(f"Training Complete. Best Validation Accuracy: {best_val_acc:.2f}%")
-print("Evaluating Best Model Weights on Test Split...\n")
-
-# Load best checkpoint for test evaluation
-model.load_state_dict(torch.load(MODEL_OUTPUT))
-model.eval()
-
-test_correct, test_total = 0, 0
-with torch.no_grad():
-    for images, labels in test_loader:
-        images, labels = images.to(DEVICE), labels.to(DEVICE)
-        outputs = model(images)
-        _, predicted = torch.max(outputs, 1)
-        test_total += labels.size(0)
-        test_correct += (predicted == labels).sum().item()
-
-test_accuracy = 100 * test_correct / test_total
-print(f"FINAL TEST ACCURACY: {test_accuracy:.2f}%")
-print(f"Model saved to: {MODEL_OUTPUT.resolve()}\n")
+if __name__ == '__main__':
+    main()
