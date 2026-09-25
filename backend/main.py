@@ -2,6 +2,7 @@ import os
 import httpx
 from typing import List
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, status, Query
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 import models
@@ -15,6 +16,15 @@ app = FastAPI(
     title="Kabadiwala Connect API",
     description="Backend service linking Mobile App (P1) with MobileNetV3 AI Inference (P6)",
     version="1.0.0"
+)
+
+# Place CORSMiddleware HERE, directly after `app` is instantiated
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Route aligned with P6 active inference endpoint (/analyze)
@@ -173,31 +183,40 @@ def create_transaction(transaction: schemas.TransactionCreate, db: Session = Dep
     db.refresh(db_transaction)
     return db_transaction
 
-@app.post("/api/v1/e-waste/scan-and-match")
-async def scan_and_match(file: UploadFile = File(...), db: Session = Depends(get_db)):
+# ==========================================
+# UNIFIED SCAN & MATCH ENDPOINT
+# ==========================================
+
+@app.post("/api/v1/e-waste/scan-and-match", tags=["E-Waste Operations"])
+async def scan_and_match(
+    file: UploadFile = File(...), 
+    db: Session = Depends(get_db)
+):
     """
-    Unified endpoint for P1 Frontend:
-    1. Runs AI inference via P6
-    2. Fetches price per kg
-    3. Finds local recyclers accepting the detected category
+    Unified Endpoint for P1 Frontend:
+    1. Forwards image to P6 AI for MobileNetV3 classification.
+    2. Fetches per-kg valuation for predicted scrap category.
+    3. Finds active recyclers accepting this scrap category.
     """
-    # Step 1: Run AI inference
+    # 1. Run AI Inference via P6 Proxy
     ai_result = await analyze_image(file)
     predicted_cat = ai_result.predicted_class
-    
-    # Step 2: Fetch price per kg
+
+    # 2. Fetch Pricing Data matching your exact schema attribute
+    # Fetch Pricing Data matching your exact schema attribute
     price_entry = db.query(models.MaterialPrice).filter(
-        models.MaterialPrice.category == predicted_cat
+        models.MaterialPrice.category_name == predicted_cat  # Adjust 'category_name' to match models.py
     ).first()
-    price_per_kg = price_entry.price_per_kg if price_entry else 0.0
     
-    # Step 3: Match recyclers
+    price_per_kg = price_entry.price_per_kg if price_entry else 0.0
+
+    # 3. Match Recyclers
     all_recyclers = db.query(models.Recycler).all()
     matched_recyclers = [
         r for r in all_recyclers
         if r.accepted_categories and predicted_cat.upper() in [c.upper() for c in r.accepted_categories]
     ]
-    
+
     return {
         "classification": ai_result,
         "price_per_kg": price_per_kg,
