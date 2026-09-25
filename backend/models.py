@@ -13,7 +13,6 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from database import Base
 
-
 class PickupStatus(str, enum.Enum):
     PENDING = "pending"
     ASSIGNED = "assigned"
