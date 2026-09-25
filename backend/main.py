@@ -175,16 +175,23 @@ def create_transaction(transaction: schemas.TransactionCreate, db: Session = Dep
 
 @app.post("/api/v1/e-waste/scan-and-match")
 async def scan_and_match(file: UploadFile = File(...), db: Session = Depends(get_db)):
-    # 1. Run inference via P6 AI engine proxy
+    """
+    Unified endpoint for P1 Frontend:
+    1. Runs AI inference via P6
+    2. Fetches price per kg
+    3. Finds local recyclers accepting the detected category
+    """
+    # Step 1: Run AI inference
     ai_result = await analyze_image(file)
     predicted_cat = ai_result.predicted_class
     
-    # 2. Query price per kg
-    price_item = db.query(models.MaterialPrice).filter(
+    # Step 2: Fetch price per kg
+    price_entry = db.query(models.MaterialPrice).filter(
         models.MaterialPrice.category == predicted_cat
     ).first()
+    price_per_kg = price_entry.price_per_kg if price_entry else 0.0
     
-    # 3. Query matching recyclers accepting this category
+    # Step 3: Match recyclers
     all_recyclers = db.query(models.Recycler).all()
     matched_recyclers = [
         r for r in all_recyclers
@@ -193,6 +200,6 @@ async def scan_and_match(file: UploadFile = File(...), db: Session = Depends(get
     
     return {
         "classification": ai_result,
-        "price_per_kg": price_item.price_per_kg if price_item else 0.0,
+        "price_per_kg": price_per_kg,
         "matched_recyclers": matched_recyclers
     }
