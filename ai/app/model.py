@@ -1,71 +1,61 @@
 import torch
-from torchvision import models, transforms
+import torch.nn as nn
 from PIL import Image
-from pathlib import Path
+from torchvision import models, transforms
 
-# Match class list alphabetical ordering (PyTorch ImageFolder defaults to alphabetical)
-CATEGORIES = [
-    "CABLE_WIRE",
-    "COMPUTER_LAPTOP",
-    "FRIDGE_AC",
-    "MOBILE_TABLET",
-    "NOT_SURE",
-    "OTHER_ELECTRONICS",
-    "TV_MONITOR",
-    "WASHING_APPLIANCE"
+DEVICE = torch.device("cpu")
+MODEL_PATH = "ai/models/mobilenet_v3_e_waste.pth"
+CLASSES = [
+    'CABLE_WIRE', 'COMPUTER_LAPTOP', 'FRIDGE_AC', 'MOBILE_TABLET',
+    'NOT_SURE', 'OTHER_ELECTRONICS', 'TV_MONITOR', 'WASHING_APPLIANCE'
 ]
+CONFIDENCE_THRESHOLD = 0.85
 
-device = torch.device("cpu")
+def load_model():
+    model = models.mobilenet_v3_small(weights=None)
+    in_features = model.classifier[3].in_features
+    model.classifier[3] = nn.Linear(in_features, len(CLASSES))
+    
+    state_dict = torch.load(MODEL_PATH, map_location=DEVICE)
+    model.load_state_dict(state_dict)
+    model.eval()
+    return model
 
-# Model Initialization
-model = models.mobilenet_v3_small(weights=None)
-model.classifier[3] = torch.nn.Linear(
-    model.classifier[3].in_features,
-    len(CATEGORIES)
-)
+model = load_model()
 
-MODEL_PATH = Path(__file__).resolve().parents[1] / "models" / "mobilenet_v3_small.pth"
-
-if MODEL_PATH.exists():
-    model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
-
-model = model.to(device)
-model.eval()
-
-# Standard ImageNet Transforms
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
-    transforms.Normalize(
-        mean=[0.485, 0.456, 0.406],
-        std=[0.229, 0.224, 0.225]
-    )
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
-CONFIDENCE_THRESHOLD = 0.60
-
-def predict(image: Image.Image) -> dict:
-    image = image.convert("RGB")
-    tensor_image = transform(image).unsqueeze(0).to(device)
-
+def predict(pil_image: Image.Image) -> dict:
+    image_rgb = pil_image.convert("RGB")
+    tensor = transform(image_rgb).unsqueeze(0).to(DEVICE)
+    
     with torch.no_grad():
-        output = model(tensor_image)
-        probabilities = torch.softmax(output, dim=1)
-        confidence, index = torch.max(probabilities, dim=1)
+        outputs = model(tensor)
+        probabilities = torch.nn.functional.softmax(outputs[0], dim=0)
+        conf, pred_idx = torch.max(probabilities, dim=0)
+        
+        raw_class = CLASSES[pred_idx.item()]
+        confidence_score = round(conf.item(), 4)
 
-    score = round(confidence.item(), 4)
-    predicted_category = CATEGORIES[index.item()]
-
-    # Fallback trigger if confidence is below operating threshold
-    if score < CONFIDENCE_THRESHOLD:
-        return {
-            "category": "NOT_SURE",
-            "confidence": score,
-            "low_confidence_flag": True
-        }
+    if confidence_score < CONFIDENCE_THRESHOLD:
+        final_class = "NOT_SURE"
+        requires_manual = True
+    else:
+        final_class = raw_class
+        requires_manual = False
 
     return {
-        "category": predicted_category,
-        "confidence": score,
-        "low_confidence_flag": False
+        "status": "success",
+        "predicted_class": final_class,
+        "raw_prediction": raw_class,
+        "confidence": confidence_score,
+        "requires_manual_review": requires_manual,
+        "class_probabilities": {
+            cls_name: round(prob.item(), 4) 
+            for cls_name, prob in zip(CLASSES, probabilities)
+        }
     }
