@@ -17,7 +17,8 @@ app = FastAPI(
     version="1.0.0"
 )
 
-AI_SERVICE_URL = os.getenv("AI_SERVICE_URL", "http://localhost:8001/analyze")
+# Route aligned with P6 active inference endpoint (/analyze)
+AI_SERVICE_URL = os.getenv("AI_SERVICE_URL", "http://127.0.0.1:8001/analyze")
 
 
 @app.get("/")
@@ -42,12 +43,13 @@ async def analyze_image(file: UploadFile = File(...)):
         )
 
     try:
-        contents = await file.read()
+        # Read file bytes correctly into file_bytes
+        file_bytes = await file.read()
         
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.post(
                 AI_SERVICE_URL,
-                files={"file": (file.filename, contents, file.content_type)}
+                files={"image": (file.filename, file_bytes, file.content_type)}
             )
 
         if response.status_code != 200:
@@ -141,6 +143,7 @@ def get_all_pickups(db: Session = Depends(get_db)):
     """Retrieves all pickup requests."""
     return db.query(models.PickupRequest).all()
 
+
 # ==========================================
 # 4. TRANSACTION ENDPOINTS
 # ==========================================
@@ -169,3 +172,27 @@ def create_transaction(transaction: schemas.TransactionCreate, db: Session = Dep
     db.commit()
     db.refresh(db_transaction)
     return db_transaction
+
+@app.post("/api/v1/e-waste/scan-and-match")
+async def scan_and_match(file: UploadFile = File(...), db: Session = Depends(get_db)):
+    # 1. Run inference via P6 AI engine proxy
+    ai_result = await analyze_image(file)
+    predicted_cat = ai_result.predicted_class
+    
+    # 2. Query price per kg
+    price_item = db.query(models.MaterialPrice).filter(
+        models.MaterialPrice.category == predicted_cat
+    ).first()
+    
+    # 3. Query matching recyclers accepting this category
+    all_recyclers = db.query(models.Recycler).all()
+    matched_recyclers = [
+        r for r in all_recyclers
+        if r.accepted_categories and predicted_cat.upper() in [c.upper() for c in r.accepted_categories]
+    ]
+    
+    return {
+        "classification": ai_result,
+        "price_per_kg": price_item.price_per_kg if price_item else 0.0,
+        "matched_recyclers": matched_recyclers
+    }
