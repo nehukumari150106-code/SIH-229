@@ -18,3 +18,5 @@ mobile/.metro-health-check*
 
 # Logs
 *.log
+node_modules/
+backend/
