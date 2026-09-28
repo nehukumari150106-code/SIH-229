@@ -11,15 +11,29 @@ import { getCustomerCategory } from '../../constants/customerCategories';
 function PickupDetails({ navigation, route }) {
   // This will receive the real pickup later from CreatePickup.
   // Demo data keeps the screen visible while we build and test it.
-  const pickup = route?.params?.pickup || {
-    pickup_id: 'PICKUP-123456',
-    customer_category: 'OTHER_ELECTRONICS',
-    estimated_weight: 5,
-    location: 'Your saved location',
-    preferred_time: '10:00 AM - 12:00 PM',
-    status: 'pending',
-  };
-  const category = getCustomerCategory(pickup.customer_category || pickup.material);
+ const rawPickup = route?.params?.pickup || {
+  pickup_id: 'PICKUP-123456',
+  customer_category: 'OTHER_ELECTRONICS',
+  estimated_weight: 5,
+  location: 'Your saved location',
+  preferred_time: '10:00 AM - 12:00 PM',
+  status: 'pending',
+};
+
+const pickup = {
+  ...rawPickup,
+  pickup_id: rawPickup.pickup_id || rawPickup.id,
+  customer_category:
+    rawPickup.customer_category || rawPickup.scrap_type,
+  estimated_weight:
+    rawPickup.estimated_weight ?? rawPickup.estimated_weight_kg,
+  location: rawPickup.location || rawPickup.address,
+  preferred_time: rawPickup.preferred_time || 'Not specified',
+};
+
+const category = getCustomerCategory(
+  pickup.customer_category || pickup.material,
+);
 
   return (
     <ScrollView

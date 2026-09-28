@@ -59,3 +59,43 @@ export const googleLogin = async (idToken, role) => {
     throw error;
   }
 };
+// 4. Create a customer pickup request
+export const createPickup = async pickupData => {
+  try {
+    const response = await fetch(`${BASE_URL}/pickups/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(pickupData),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.detail || 'Failed to create pickup');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Create Pickup API Error:', error);
+    throw error;
+  }
+};
+// 5. Fetch customer pickup requests
+export const fetchPickups = async () => {
+  try {
+    const response = await fetch(`${BASE_URL}/pickups/`);
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.detail || 'Failed to fetch pickups');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Fetch Pickups API Error:', error);
+    throw error;
+  }
+};

@@ -9,12 +9,14 @@ import {
   Alert,
 } from 'react-native';
 import { CUSTOMER_CATEGORIES } from '../../constants/customerCategories';
+import { createPickup } from '../../services/api';
 
 function CreatePickup({ navigation }) {
   const [customerCategory, setCustomerCategory] = useState(null);
   const [weight, setWeight] = useState('');
   const [location, setLocation] = useState('');
   const [preferredTime, setPreferredTime] = useState('');
+  const [loading, setLoading] = useState(false);
 
   return (
     <ScrollView
@@ -97,41 +99,68 @@ function CreatePickup({ navigation }) {
 
       {/* Create Pickup */}
       <TouchableOpacity
-        style={styles.createButton}
-        onPress={() => {
+  style={styles.createButton}
+  disabled={loading}
+  onPress={async () => {
   if (!customerCategory || !weight || !location || !preferredTime) {
     Alert.alert(
       'Missing Information',
-      'Please fill in all pickup details.'
+      'Please fill in all pickup details.',
     );
     return;
   }
 
-  const pickup = {
-    pickup_id: `PICKUP-${Date.now()}`,
-    customer_id: 'customer_demo',
-    collector_id: null,
-    customer_category: customerCategory,
-    category_confidence: null,
-    photo: null,
-    estimated_weight: parseFloat(weight),
-    location: location,
-    preferred_time: preferredTime,
-    status: 'pending',
-  };
+  try {
+    setLoading(true);
 
-  console.log('Pickup Created:', pickup);
-  navigation.navigate('PickupDetails', {
-  pickup: pickup,
+    const selectedCategory = CUSTOMER_CATEGORIES.find(
+      item => item.id === customerCategory,
+    );
+
+    const pickupData = {
+      name: 'Tejas',
+      phone: '9999999999',
+      address: location,
+      scrap_type: customerCategory,
+      estimated_weight_kg: parseFloat(weight),
+      image_url: null,
+      ai_predicted_class: null,
+      ai_confidence: null,
+      user_confirmed_class: customerCategory,
+    };
+
+    console.log('Sending pickup to backend:', pickupData);
+
+    const pickup = await createPickup(pickupData);
+
+    console.log('Pickup created by backend:', pickup);
+
+   navigation.navigate('PickupDetails', {
+  pickup: {
+    ...pickup,
+    preferred_time: preferredTime,
+  },
 });
 
-  Alert.alert(
-    'Pickup Created! 🎉',
-    `Your ${CUSTOMER_CATEGORIES.find((item) => item.id === customerCategory).label} pickup request has been created.`,
-  );
+    Alert.alert(
+      'Pickup Created! 🎉',
+      `Your ${selectedCategory.label} pickup request has been created.`,
+    );
+  } catch (error) {
+    console.error('Pickup creation failed:', error);
+
+    Alert.alert(
+      'Pickup Failed',
+      error.message || 'Could not create pickup. Please try again.',
+    );
+  } finally {
+    setLoading(false);
+  }
 }}
       >
-        <Text style={styles.createButtonText}>Create Pickup</Text>
+       <Text style={styles.createButtonText}>
+  {loading ? 'Creating Pickup...' : 'Create Pickup'}
+</Text>
       </TouchableOpacity>
 
     </ScrollView>
