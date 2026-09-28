@@ -2,7 +2,7 @@ from io import BytesIO
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from PIL import Image
 
-from ai.app.model import predict
+from app.model import predict
 
 app = FastAPI(title="Kabadiwala Connect - Customer AI Engine")
 
