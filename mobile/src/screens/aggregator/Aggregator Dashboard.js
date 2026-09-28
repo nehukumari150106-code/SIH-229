@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -7,14 +7,41 @@ import {
 } from "react-native";
 
 import styles from "./AggregatorStyles";
-
+const text = {
+  English: {
+    title: "Aggregator Dashboard",
+    subtitle: "Manage lots, inventory and recycler activity"
+  },
+  Marathi: {
+    title: "ॲग्रीगेटर डॅशबोर्ड",
+    subtitle: "लॉट्स, इनव्हेंटरी आणि रीसायकलर कामे व्यवस्थापित करा"
+  },
+  Hindi: {
+    title: "एग्रीगेटर डैशबोर्ड",
+    subtitle: "लॉट, इन्वेंट्री और रीसाइक्लर गतिविधियों को संभालें"
+  }
+};
 const AggregatorDashboard = ({ navigation }) => {
+ const [language, setLanguage] = useState('English');
+
   return (
     <ScrollView style={styles.container}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-around', padding: 10 }}>
+        <TouchableOpacity onPress={() => setLanguage('English')}>
+          <Text>English</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => setLanguage('Marathi')}>
+          <Text>मराठी</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => setLanguage('Hindi')}>
+          <Text>हिंदी</Text>
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Aggregator Dashboard</Text>
+        <Text style={styles.headerTitle}>{text[language].title}</Text>
         <Text style={styles.headerSubtitle}>
-          Manage lots, inventory and recycler activity
+          {text[language].subtitle}
         </Text>
       </View>
 
