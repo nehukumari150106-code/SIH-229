@@ -18,3 +18,9 @@ mobile/.metro-health-check*
 
 # Logs
 *.log
+# Python
+__pycache__/
+*.py[cod]
+
+# Local SQLite database
+*.db
