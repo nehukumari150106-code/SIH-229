@@ -12,9 +12,12 @@ import {
   GoogleSignin,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
+import {googleLogin} from '../../services/api';
 
-function Login({navigation}) {
+function Login({navigation, onAuthenticated}) {
   const [loading, setLoading] = useState(false);
+  const [pendingIdToken, setPendingIdToken] = useState(null);
+const [showRoleSelection, setShowRoleSelection] = useState(false);
 
   useEffect(() => {
     GoogleSignin.configure({
@@ -31,11 +34,24 @@ function Login({navigation}) {
 
       const response = await GoogleSignin.signIn();
 
-      console.log('Google Sign-In response:', response);
+console.log('Google Sign-In response:', response);
 
-      // For now, just prove that Google authentication works.
-      // Backend authentication will be connected next.
-      navigation.navigate('CustomerDashboard');
+if (response.type !== 'success') {
+  throw new Error('Google sign-in was not successful.');
+}
+
+const idToken = response.data?.idToken;
+
+if (!idToken) {
+  throw new Error('Google ID token was not returned.');
+}
+
+console.log('Google ID token received.');
+
+setPendingIdToken(idToken);
+setShowRoleSelection(true);
+
+console.log('ROLE SELECTION SHOULD SHOW NOW');
     } catch (error) {
       console.log('Google Sign-In error:', error);
 
@@ -58,64 +74,128 @@ function Login({navigation}) {
       setLoading(false);
     }
   };
-  
+  const handleRoleSelection = async role => {
+  try {
+    setLoading(true);
+
+    const user = await googleLogin(pendingIdToken, role);
+
+    console.log('Backend user:', user);
+
+    setShowRoleSelection(false);
+setPendingIdToken(null);
+
+onAuthenticated(user.role);
+
+navigation.replace('CustomerDashboard');
+  } catch (error) {
+    console.log('Role authentication error:', error);
+
+    Alert.alert(
+      'Authentication Failed',
+      error.message || 'Could not complete authentication.',
+    );
+  } finally {
+    setLoading(false);
+  }
+};
   return (
-    <View style={styles.container}>
-      <Text style={styles.logo}>♻️</Text>
+    <View style={styles.card}>
+  {showRoleSelection ? (
+    <>
+      <Text style={styles.heading}>Choose Your Role</Text>
 
-      <Text style={styles.title}>Kabadiwala Connect</Text>
-
-      <Text style={styles.subtitle}>
-        Give your scrap a new journey.
+      <Text style={styles.roleSubtitle}>
+        Select how you will use Kabadiwala Connect.
       </Text>
 
-      <View style={styles.card}>
-        <Text style={styles.heading}>Customer Login</Text>
+      <TouchableOpacity
+        style={styles.roleButton}
+        onPress={() => handleRoleSelection('customer')}
+        disabled={loading}>
+        <Text style={styles.roleIcon}>👤</Text>
+        <Text style={styles.roleButtonText}>Customer</Text>
+      </TouchableOpacity>
 
-        <Text style={styles.label}>Mobile Number</Text>
+      <TouchableOpacity
+        style={styles.roleButton}
+        onPress={() => handleRoleSelection('collector')}
+        disabled={loading}>
+        <Text style={styles.roleIcon}>🚚</Text>
+        <Text style={styles.roleButtonText}>Collector</Text>
+      </TouchableOpacity>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Enter mobile number"
-          keyboardType="phone-pad"
-        />
+      <TouchableOpacity
+        style={styles.roleButton}
+        onPress={() => handleRoleSelection('aggregator')}
+        disabled={loading}>
+        <Text style={styles.roleIcon}>🏭</Text>
+        <Text style={styles.roleButtonText}>Aggregator</Text>
+      </TouchableOpacity>
 
-        <Text style={styles.label}>Password / OTP</Text>
+      <TouchableOpacity
+        style={styles.roleButton}
+        onPress={() => handleRoleSelection('recycler')}
+        disabled={loading}>
+        <Text style={styles.roleIcon}>♻️</Text>
+        <Text style={styles.roleButtonText}>Recycler</Text>
+      </TouchableOpacity>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Enter password or OTP"
-          secureTextEntry
-        />
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('CustomerDashboard')}>
-          <Text style={styles.buttonText}>Login</Text>
-        </TouchableOpacity>
-
-        <View style={styles.dividerContainer}>
-          <View style={styles.divider} />
-          <Text style={styles.orText}>OR</Text>
-          <View style={styles.divider} />
-        </View>
-
-        <TouchableOpacity
-          style={styles.googleButton}
-          onPress={handleGoogleLogin}
-          disabled={loading}>
-          <Text style={styles.googleIcon}>G</Text>
-
-          <Text style={styles.googleButtonText}>
-            {loading ? 'Signing in...' : 'Continue with Google'}
-          </Text>
-        </TouchableOpacity>
-
+      {loading && (
         <Text style={styles.helpText}>
-          Sign in with your Google account to continue.
+          Setting up your account...
         </Text>
+      )}
+    </>
+  ) : (
+    <>
+      <Text style={styles.heading}>Customer Login</Text>
+
+      <Text style={styles.label}>Mobile Number</Text>
+
+      <TextInput
+        style={styles.input}
+        placeholder="Enter mobile number"
+        keyboardType="phone-pad"
+      />
+
+      <Text style={styles.label}>Password / OTP</Text>
+
+      <TextInput
+        style={styles.input}
+        placeholder="Enter password or OTP"
+        secureTextEntry
+      />
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate('CustomerDashboard')}>
+        <Text style={styles.buttonText}>Login</Text>
+      </TouchableOpacity>
+
+      <View style={styles.dividerContainer}>
+        <View style={styles.divider} />
+        <Text style={styles.orText}>OR</Text>
+        <View style={styles.divider} />
       </View>
-    </View>
+
+      <TouchableOpacity
+        style={styles.googleButton}
+        onPress={handleGoogleLogin}
+        disabled={loading}>
+        <Text style={styles.googleIcon}>G</Text>
+
+        <Text style={styles.googleButtonText}>
+          {loading ? 'Signing in...' : 'Continue with Google'}
+        </Text>
+      </TouchableOpacity>
+
+      <Text style={styles.helpText}>
+        Sign in with your Google account to continue.
+      </Text>
+    </>
+  )}
+</View>
   );
 }
 
@@ -243,6 +323,34 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 16,
   },
+  roleSubtitle: {
+  fontSize: 14,
+  color: '#5F6B65',
+  marginBottom: 18,
+},
+
+roleButton: {
+  height: 58,
+  borderWidth: 1,
+  borderColor: '#D8E1DC',
+  borderRadius: 12,
+  flexDirection: 'row',
+  alignItems: 'center',
+  paddingHorizontal: 16,
+  marginBottom: 12,
+  backgroundColor: '#FFFFFF',
+},
+
+roleIcon: {
+  fontSize: 24,
+  marginRight: 14,
+},
+
+roleButtonText: {
+  fontSize: 16,
+  fontWeight: '600',
+  color: '#17201C',
+},
 });
 
 export default Login;

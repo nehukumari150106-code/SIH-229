@@ -5,7 +5,7 @@ import {
   ScrollView,
 } from "react-native";
 
-import styles from "./AggregatorStyles";
+import styles from "./aggregatorstyles";
 
 const transactions = [
   {
@@ -14,8 +14,8 @@ const transactions = [
     recycler: "EcoRecycle Pvt. Ltd.",
     material: "PCB",
     weight: "20 kg",
-    rate: "₹410/kg",
-    total: "₹8,200",
+    rate: "â‚¹410/kg",
+    total: "â‚¹8,200",
   },
   {
     id: "TXN-2002",
@@ -23,8 +23,8 @@ const transactions = [
     recycler: "Green Earth Recyclers",
     material: "Cable",
     weight: "30 kg",
-    rate: "₹300/kg",
-    total: "₹9,000",
+    rate: "â‚¹300/kg",
+    total: "â‚¹9,000",
   },
   {
     id: "TXN-2003",
@@ -32,8 +32,8 @@ const transactions = [
     recycler: "Maharashtra E-Waste",
     material: "Battery",
     weight: "22 kg",
-    rate: "₹190/kg",
-    total: "₹4,180",
+    rate: "â‚¹190/kg",
+    total: "â‚¹4,180",
   },
 ];
 
@@ -61,7 +61,7 @@ const Transactions = () => {
             </Text>
 
             <Text style={styles.statValue}>
-              ₹21,380
+              â‚¹21,380
             </Text>
           </View>
 

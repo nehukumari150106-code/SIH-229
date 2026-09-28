@@ -14,16 +14,22 @@ import CustomerProfile from '../screens/customer/CustomerProfile';
 
 const Stack = createNativeStackNavigator();
 
-function CustomerNavigator() {
-  return (
+function CustomerNavigator({onAuthenticated, startAtDashboard = false}) {  return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator
+  initialRouteName={startAtDashboard ? 'CustomerDashboard' : 'Login'}>
 
         <Stack.Screen
-          name="Login"
-          component={Login}
-          options={{ headerShown: false }}
-        />
+  name="Login"
+  options={{headerShown: false}}
+>
+  {props => (
+    <Login
+      {...props}
+      onAuthenticated={onAuthenticated}
+    />
+  )}
+</Stack.Screen>
 
         <Stack.Screen
           name="CustomerDashboard"

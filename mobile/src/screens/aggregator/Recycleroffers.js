@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 
-import styles from "./AggregatorStyles";
+import styles from "./aggregatorstyles";
 
 const offers = [
   {
@@ -14,14 +14,14 @@ const offers = [
     lot: "LOT-1024",
     material: "PCB",
     weight: "25 kg",
-    price: "₹420/kg",
+    price: "â‚¹420/kg",
   },
   {
     company: "Green Earth Recyclers",
     lot: "LOT-1025",
     material: "Cable",
     weight: "40 kg",
-    price: "₹310/kg",
+    price: "â‚¹310/kg",
   },
 ];
 
@@ -65,7 +65,7 @@ const RecyclerOffers = () => {
             </Text>
 
             <Text style={styles.cardText}>
-              {offer.material} • {offer.weight}
+              {offer.material} â€¢ {offer.weight}
             </Text>
 
             <Text style={styles.price}>

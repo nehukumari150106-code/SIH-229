@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 
-import styles from "./AggregatorStyles";
+import styles from "./aggregatorstyles";
 
 const handovers = [
   {

@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 
-import styles from "./AggregatorStyles";
+import styles from "./aggregatorstyles";
 
 const AggregatorDashboard = ({ navigation }) => {
   return (
@@ -39,7 +39,7 @@ const AggregatorDashboard = ({ navigation }) => {
 
           <View style={styles.statCard}>
             <Text style={styles.statTitle}>This Month</Text>
-            <Text style={styles.statValue}>₹42.6K</Text>
+            <Text style={styles.statValue}>â‚¹42.6K</Text>
           </View>
 
         </View>
@@ -52,7 +52,7 @@ const AggregatorDashboard = ({ navigation }) => {
               <Text style={styles.material}>PCB - LOT-1024</Text>
               <Text style={styles.status}>Received</Text>
             </View>
-            <Text style={styles.cardText}>Amit Shinde • Rajur</Text>
+            <Text style={styles.cardText}>Amit Shinde â€¢ Rajur</Text>
             <Text style={styles.cardText}>25 kg</Text>
           </View>
 
@@ -61,7 +61,7 @@ const AggregatorDashboard = ({ navigation }) => {
               <Text style={styles.material}>Cable - LOT-1025</Text>
               <Text style={styles.status}>Received</Text>
             </View>
-            <Text style={styles.cardText}>Suresh Pawar • Parner</Text>
+            <Text style={styles.cardText}>Suresh Pawar â€¢ Parner</Text>
             <Text style={styles.cardText}>40 kg</Text>
           </View>
 
@@ -96,17 +96,17 @@ const AggregatorDashboard = ({ navigation }) => {
 
           <Text style={styles.material}>EcoRecycle Pvt. Ltd.</Text>
           <Text style={styles.cardText}>
-            PCB • 25 kg
+            PCB â€¢ 25 kg
           </Text>
-          <Text style={styles.price}>₹420/kg</Text>
+          <Text style={styles.price}>â‚¹420/kg</Text>
 
           <View style={{ height: 15 }} />
 
           <Text style={styles.material}>Green Earth Recyclers</Text>
           <Text style={styles.cardText}>
-            Cable • 40 kg
+            Cable â€¢ 40 kg
           </Text>
-          <Text style={styles.price}>₹310/kg</Text>
+          <Text style={styles.price}>â‚¹310/kg</Text>
         </View>
 
       </View>
