@@ -10,6 +10,7 @@ import RecyclerProfile from './src/screens/recycler/RecyclerProfile';
 import MyOffers from './src/screens/recycler/MyOffers';
 import Handover from './src/screens/recycler/Handover';
 import Transactions from './src/screens/recycler/Transactions';
+import LocationScreen from './src/screens/customer/LocationScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -25,6 +26,7 @@ export default function App() {
         <Stack.Screen name="MyOffers" component={MyOffers} options={{ title: 'My Offers' }} />
         <Stack.Screen name="Handover" component={Handover} options={{ title: 'Handover' }} />
         <Stack.Screen name="Transactions" component={Transactions} options={{ title: 'Transactions' }} />
+        <Stack.Screen name="LocationScreen" component={LocationScreen} options={{ title: 'Select Location' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
