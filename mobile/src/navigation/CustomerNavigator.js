@@ -11,6 +11,7 @@ import PickupTracking from '../screens/customer/PickupTracking';
 import Transactions from '../screens/customer/Transactions';
 import TransactionDetails from '../screens/customer/TransactionDetails';
 import CustomerProfile from '../screens/customer/CustomerProfile';
+import EWasteDrive from '../screens/customer/eWasteDrive';
 
 const Stack = createNativeStackNavigator();
 
@@ -64,6 +65,11 @@ function CustomerNavigator() {
   name="CustomerProfile"
   component={CustomerProfile}
   options={{ title: 'My Profile' }}
+/>
+<Stack.Screen
+  name="EWasteDrive"
+  component={EWasteDrive}
+  options={{ title: 'E-Waste Drive' }}
 />
 
       </Stack.Navigator>

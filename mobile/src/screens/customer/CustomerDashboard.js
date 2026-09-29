@@ -21,25 +21,41 @@ function CustomerDashboard({ navigation }) {
 
       <View style={styles.cardRow}>
 
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => navigation.navigate('MyPickups')}
-        >
-          <Text style={styles.cardIcon}>📦</Text>
-          <Text style={styles.cardTitle}>My Pickups</Text>
-          <Text style={styles.cardText}>View your pickup requests</Text>
-        </TouchableOpacity>
+  <TouchableOpacity
+    style={styles.card}
+    onPress={() => navigation.navigate('MyPickups')}
+  >
+    <Text style={styles.cardIcon}>📦</Text>
+    <Text style={styles.cardTitle}>My Pickups</Text>
+    <Text style={styles.cardText}>View your pickup requests</Text>
+  </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => navigation.navigate('Transactions')}
-        >
-          <Text style={styles.cardIcon}>💰</Text>
-          <Text style={styles.cardTitle}>Transactions</Text>
-          <Text style={styles.cardText}>View your payments</Text>
-        </TouchableOpacity>
+  <TouchableOpacity
+    style={styles.card}
+    onPress={() => navigation.navigate('Transactions')}
+  >
+    <Text style={styles.cardIcon}>💰</Text>
+    <Text style={styles.cardTitle}>Transactions</Text>
+    <Text style={styles.cardText}>View your payments</Text>
+  </TouchableOpacity>
 
-      </View>
+</View>
+
+<TouchableOpacity
+  style={styles.driveButton}
+  onPress={() => navigation.navigate('EWasteDrive')}
+>
+  <Text style={styles.driveIcon}>♻️</Text>
+
+  <View style={styles.driveContent}>
+    <Text style={styles.driveTitle}>E-Waste Drive</Text>
+    <Text style={styles.driveText}>
+      Join a nearby e-waste collection drive
+    </Text>
+  </View>
+
+  <Text style={styles.arrow}>›</Text>
+</TouchableOpacity>
 
       <TouchableOpacity
         style={styles.profileButton}
@@ -125,6 +141,41 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#5F6B65',
   },
+  driveButton: {
+  backgroundColor: '#FFFFFF',
+  borderRadius: 14,
+  padding: 16,
+  marginTop: 16,
+  flexDirection: 'row',
+  alignItems: 'center',
+  elevation: 2,
+},
+
+driveIcon: {
+  fontSize: 32,
+  marginRight: 14,
+},
+
+driveContent: {
+  flex: 1,
+},
+
+driveTitle: {
+  fontSize: 17,
+  fontWeight: '600',
+  color: '#17201C',
+  marginBottom: 5,
+},
+
+driveText: {
+  fontSize: 12,
+  color: '#5F6B65',
+},
+
+arrow: {
+  fontSize: 28,
+  color: '#176B4D',
+},
 
   profileButton: {
     backgroundColor: '#E8F5EF',
