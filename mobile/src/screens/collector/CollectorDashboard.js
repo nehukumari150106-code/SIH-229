@@ -43,16 +43,31 @@ export default function CollectorDashboard({ navigation }) {
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Earnings</Text>
-        <Text style={styles.amount}>₹1,920</Text>
+  <Text style={styles.cardTitle}>Earnings</Text>
+  <Text style={styles.amount}>₹1,920</Text>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('Earnings')}
-        >
-          <Text style={styles.buttonText}>View Earnings</Text>
-        </TouchableOpacity>
-      </View>
+  <TouchableOpacity
+    style={styles.button}
+    onPress={() => navigation.navigate('Earnings')}
+  >
+    <Text style={styles.buttonText}>View Earnings</Text>
+  </TouchableOpacity>
+</View>
+
+<View style={styles.card}>
+  <Text style={styles.cardTitle}>♻️ E-Waste Drive</Text>
+
+  <Text style={styles.driveText}>
+    Join and manage e-waste collection drives
+  </Text>
+
+  <TouchableOpacity
+    style={styles.button}
+    onPress={() => navigation.navigate('EWasteDrive')}
+  >
+    <Text style={styles.buttonText}>View E-Waste Drive</Text>
+  </TouchableOpacity>
+</View>
 
     </ScrollView>
   );
@@ -112,9 +127,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center'
   },
+buttonText: {
+  color: '#FFFFFF',
+  fontWeight: 'bold'
+},
 
-  buttonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold'
-  }
-});
+driveText: {
+  fontSize: 14,
+  color: '#5F6B65',
+  marginVertical: 10
+}
+ );

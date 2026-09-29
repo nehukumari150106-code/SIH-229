@@ -271,6 +271,77 @@ function openTransaction(transactionId) {
 }
 
 
+/* ================= E-WASTE DRIVE ================= */
+
+function joinEWasteDrive() {
+
+    const joined = confirm(
+        "Do you want to join the E-Waste Drive?"
+    );
+
+
+    if (!joined) {
+        return;
+    }
+
+
+    document.getElementById("driveParticipation").innerText =
+        "Joined";
+
+
+    alert(
+        "You have successfully joined the E-Waste Drive!"
+    );
+}
+
+
+/* ================= RECORD E-WASTE DRIVE WEIGHT ================= */
+
+function recordDriveWeight() {
+
+    const weightInput =
+        document.getElementById("driveWeight");
+
+
+    const weight = weightInput.value.trim();
+
+
+    if (weight === "") {
+
+        alert("Please enter the collected weight.");
+
+        weightInput.focus();
+
+        return;
+    }
+
+
+    const numericWeight = Number(weight);
+
+
+    if (isNaN(numericWeight) || numericWeight <= 0) {
+
+        alert("Please enter a valid collected weight.");
+
+        weightInput.focus();
+
+        return;
+    }
+
+
+    document.getElementById("driveCollectedWeight").innerText =
+        numericWeight.toFixed(1) + " kg";
+
+
+    alert(
+        "E-Waste collection weight recorded successfully!"
+    );
+
+
+    showScreen("eWasteDriveScreen");
+}
+
+
 /* ================= START APP ================= */
 
 document.addEventListener("DOMContentLoaded", function() {

@@ -660,6 +660,26 @@ h3 {
 }
 
 
+/* ================= E-WASTE DRIVE ================= */
+
+#eWasteDriveScreen .card h3 {
+    color: #176B4D;
+}
+
+#eWasteDriveScreen .details-card button {
+    width: 100%;
+}
+
+#eWasteDriveScreen .card button {
+    width: 100%;
+    margin-top: 10px;
+}
+
+#driveWeightScreen .weight-card button {
+    width: 100%;
+}
+
+
 /* ================= MOBILE ================= */
 
 @media (max-width: 380px) {

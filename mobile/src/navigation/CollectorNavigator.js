@@ -21,6 +21,7 @@ import Transactions from '../screens/collector/Transactions';
 import TransactionDetails from '../screens/collector/TransactionDetails';
 import Notifications from '../screens/collector/Notifications';
 import CollectorProfile from '../screens/collector/CollectorProfile';
+import EWasteDrive from '../screens/collector/eWasteDrive';
 
 const Stack = createNativeStackNavigator();
 
@@ -96,6 +97,11 @@ export default function CollectorNavigator() {
           name="CollectorProfile"
           component={CollectorProfile}
         />
+        <Stack.Screen
+  name="EWasteDrive"
+  component={EWasteDrive}
+  options={{ title: 'E-Waste Drive' }}
+/>
 
       </Stack.Navigator>
 

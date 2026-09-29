@@ -1,0 +1,210 @@
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
+
+const EWasteDrive = ({ navigation }) => {
+  const handleJoinDrive = () => {
+    Alert.alert(
+      'Drive Joined',
+      'You have joined the E-Waste Drive successfully.'
+    );
+  };
+
+  const handleStartCollection = () => {
+    Alert.alert(
+      'Collection Started',
+      'You can now start collecting e-waste at the drive.'
+    );
+  };
+
+  return (
+    <ScrollView style={styles.container}>
+
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <Text style={styles.backText}>←</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.headerTitle}>E-Waste Drive</Text>
+      </View>
+
+      {/* Drive Information */}
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>♻️ Upcoming E-Waste Drive</Text>
+
+        <Text style={styles.info}>📅 Date: 5 October 2026</Text>
+        <Text style={styles.info}>⏰ Time: 10:00 AM – 4:00 PM</Text>
+        <Text style={styles.info}>
+          📍 Location: Community Collection Centre
+        </Text>
+
+        <TouchableOpacity
+          style={styles.joinButton}
+          onPress={handleJoinDrive}
+        >
+          <Text style={styles.buttonText}>Join Drive</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Collection */}
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>📦 Collection</Text>
+
+        <Text style={styles.info}>
+          Collect e-waste safely from customers and record the collected
+          material.
+        </Text>
+
+        <TouchableOpacity
+          style={styles.startButton}
+          onPress={handleStartCollection}
+        >
+          <Text style={styles.buttonText}>Start Collection</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* What Can Be Collected */}
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>📱 Accepted E-Waste</Text>
+
+        <Text style={styles.item}>• Mobile phones</Text>
+        <Text style={styles.item}>• Laptops and computers</Text>
+        <Text style={styles.item}>• Chargers and cables</Text>
+        <Text style={styles.item}>• Batteries</Text>
+        <Text style={styles.item}>• Keyboards and mice</Text>
+        <Text style={styles.item}>• Small electronic devices</Text>
+      </View>
+
+      {/* Safety */}
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>⚠️ Safety Instructions</Text>
+
+        <Text style={styles.item}>
+          • Do not open or break electronic devices.
+        </Text>
+
+        <Text style={styles.item}>
+          • Keep batteries separate from other e-waste.
+        </Text>
+
+        <Text style={styles.item}>
+          • Do not puncture, crush or burn batteries.
+        </Text>
+
+        <Text style={styles.item}>
+          • Handle CRTs and damaged electronics carefully.
+        </Text>
+      </View>
+
+      {/* Drive Status */}
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>📋 Drive Status</Text>
+
+        <Text style={styles.status}>
+          ● Upcoming
+        </Text>
+
+        <Text style={styles.info}>
+          Be ready at the collection centre during the scheduled drive.
+        </Text>
+      </View>
+
+    </ScrollView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F5F7F5',
+  },
+
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 18,
+    backgroundColor: '#FFFFFF',
+    elevation: 3,
+  },
+
+  backButton: {
+    marginRight: 15,
+  },
+
+  backText: {
+    fontSize: 30,
+  },
+
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+  },
+
+  card: {
+    backgroundColor: '#FFFFFF',
+    margin: 16,
+    marginBottom: 0,
+    padding: 18,
+    borderRadius: 15,
+    elevation: 2,
+  },
+
+  cardTitle: {
+    fontSize: 19,
+    fontWeight: 'bold',
+    marginBottom: 15,
+  },
+
+  info: {
+    fontSize: 15,
+    marginBottom: 10,
+    lineHeight: 22,
+  },
+
+  item: {
+    fontSize: 15,
+    marginBottom: 8,
+    lineHeight: 22,
+  },
+
+  joinButton: {
+    backgroundColor: '#176B4D',
+    padding: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+
+  startButton: {
+    backgroundColor: '#2E7D32',
+    padding: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+
+  status: {
+    color: '#2E7D32',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+});
+
+export default EWasteDrive;

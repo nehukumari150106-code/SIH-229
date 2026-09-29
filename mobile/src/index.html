@@ -156,6 +156,15 @@
                 <small>Manage profile</small>
             </button>
 
+            <!-- ================= E-WASTE DRIVE BUTTON ================= -->
+            <button
+                class="menu-card"
+                onclick="showScreen('eWasteDriveScreen')">
+                <span>♻️</span>
+                <strong>E-Waste Drive</strong>
+                <small>Join and manage collection drives</small>
+            </button>
+
         </div>
 
     </section>
@@ -1010,6 +1019,216 @@
             onclick="logout()">
             Logout
         </button>
+
+    </section>
+
+
+    <!-- ================= E-WASTE DRIVE ================= -->
+    <section id="eWasteDriveScreen" class="screen">
+
+        <header class="page-header">
+
+            <button
+                class="back-button"
+                onclick="showScreen('dashboardScreen')">
+                ←
+            </button>
+
+            <div>
+                <h2>E-Waste Drive</h2>
+                <p>Manage collection drive</p>
+            </div>
+
+        </header>
+
+
+        <!-- DRIVE DETAILS -->
+        <div class="details-card">
+
+            <div class="large-material-icon">
+                ♻️
+            </div>
+
+            <h2>Upcoming E-Waste Drive</h2>
+
+            <span class="status accepted">
+                Upcoming
+            </span>
+
+
+            <div class="details-list">
+
+                <div class="detail-row">
+                    <span>Date</span>
+                    <strong>5 October 2026</strong>
+                </div>
+
+                <div class="detail-row">
+                    <span>Time</span>
+                    <strong>10:00 AM – 4:00 PM</strong>
+                </div>
+
+                <div class="detail-row">
+                    <span>Location</span>
+                    <strong>Community Collection Centre</strong>
+                </div>
+
+                <div class="detail-row">
+                    <span>Expected Collection</span>
+                    <strong>100 kg</strong>
+                </div>
+
+            </div>
+
+
+            <div class="location-box">
+                📍 Collection Location
+                <br>
+                <strong>Community Collection Centre</strong>
+            </div>
+
+
+            <button onclick="joinEWasteDrive()">
+                Join E-Waste Drive
+            </button>
+
+        </div>
+
+
+        <!-- WHAT CAN BE COLLECTED -->
+        <div class="card">
+
+            <h3>📦 What You Can Collect</h3>
+
+            <p>• Mobile phones</p>
+            <p>• Laptops and computers</p>
+            <p>• Chargers and cables</p>
+            <p>• Batteries</p>
+            <p>• Keyboards and mice</p>
+            <p>• Small electronic devices</p>
+
+        </div>
+
+
+        <!-- SAFETY -->
+        <div class="card">
+
+            <h3>⚠️ Safety Instructions</h3>
+
+            <p>• Do not open or break electronic devices.</p>
+            <p>• Keep batteries separate from other e-waste.</p>
+            <p>• Do not puncture, crush or burn batteries.</p>
+            <p>• Handle CRTs and damaged electronics carefully.</p>
+
+        </div>
+
+
+        <!-- DRIVE COLLECTION -->
+        <div class="card">
+
+            <h3>📋 Drive Collection</h3>
+
+            <p>
+                Record the e-waste collected during the drive
+                after joining.
+            </p>
+
+            <button onclick="showScreen('driveWeightScreen')">
+                Record Collected Weight
+            </button>
+
+        </div>
+
+
+        <!-- DRIVE STATUS -->
+        <div class="card">
+
+            <h3>📊 Drive Status</h3>
+
+            <div class="detail-row">
+                <span>Participation</span>
+                <strong id="driveParticipation">
+                    Not Joined
+                </strong>
+            </div>
+
+            <div class="detail-row">
+                <span>Collected Weight</span>
+                <strong id="driveCollectedWeight">
+                    0 kg
+                </strong>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= E-WASTE DRIVE WEIGHT ================= -->
+    <section id="driveWeightScreen" class="screen">
+
+        <header class="page-header">
+
+            <button
+                class="back-button"
+                onclick="showScreen('eWasteDriveScreen')">
+                ←
+            </button>
+
+            <div>
+                <h2>Drive Collection</h2>
+                <p>Record collected e-waste</p>
+            </div>
+
+        </header>
+
+
+        <div class="weight-card">
+
+            <div class="weight-summary">
+
+                <p>Expected Drive Collection</p>
+
+                <h2>100 kg</h2>
+
+            </div>
+
+
+            <label for="driveWeight">
+                Collected E-Waste Weight
+            </label>
+
+            <div class="weight-input">
+
+                <input
+                    type="number"
+                    id="driveWeight"
+                    placeholder="0.0"
+                    step="0.1"
+                    min="0"
+                >
+
+                <span>kg</span>
+
+            </div>
+
+
+            <p class="help-text">
+                Enter the total e-waste physically collected
+                during the drive.
+            </p>
+
+
+            <div class="warning-box">
+                ⚠️ Enter the physically measured weight only.
+            </div>
+
+
+            <button onclick="recordDriveWeight()">
+                Confirm Collection
+            </button>
+
+        </div>
 
     </section>
 
