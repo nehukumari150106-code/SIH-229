@@ -1,7 +1,14 @@
 from datetime import datetime
 from typing import List, Optional
+
 from pydantic import BaseModel, ConfigDict, Field
-from models import PickupStatus, TransactionStatus
+
+from models import (
+    PickupStatus,
+    TransactionStatus,
+    LotStatus,
+    OfferStatus,
+)
 
 
 # ==========================================
@@ -10,7 +17,11 @@ from models import PickupStatus, TransactionStatus
 
 class MaterialPriceBase(BaseModel):
     category_name: str
-    price_per_kg: float = Field(..., gt=0, description="Price per kg must be greater than 0")
+    price_per_kg: float = Field(
+        ...,
+        gt=0,
+        description="Price per kg must be greater than 0"
+    )
 
 
 class MaterialPriceCreate(MaterialPriceBase):
@@ -51,11 +62,18 @@ class RecyclerResponse(RecyclerBase):
 
 class PickupRequestCreate(BaseModel):
     customer_id: Optional[int] = None
+
     name: str
     phone: str
     address: str
     scrap_type: str
+
     estimated_weight_kg: float = Field(..., gt=0)
+
+    actual_weight_kg: Optional[float] = Field(
+        None,
+        gt=0
+    )
 
     preferred_time: Optional[str] = None
 
@@ -68,11 +86,14 @@ class PickupRequestCreate(BaseModel):
 class PickupRequestResponse(BaseModel):
     id: int
     customer_id: Optional[int] = None
+
     name: str
     phone: str
     address: str
     scrap_type: str
+
     estimated_weight_kg: float
+    actual_weight_kg: Optional[float] = None
 
     preferred_time: Optional[str] = None
 
@@ -88,20 +109,59 @@ class PickupRequestResponse(BaseModel):
 
 
 # ==========================================
-# 4. AI SERVICE SCHEMAS
+# 4. LOT SCHEMAS
+# ==========================================
+
+class LotResponse(BaseModel):
+    id: int
+    pickup_id: int
+    material_category: str
+    actual_weight_kg: float
+    status: LotStatus
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+    # ==========================================
+# 5. OFFER SCHEMAS
+# ==========================================
+
+class OfferCreate(BaseModel):
+    lot_id: int
+    recycler_id: int
+    price_per_kg: float = Field(
+        ...,
+        gt=0,
+        description="Offer price per kg must be greater than 0"
+    )
+
+
+class OfferResponse(BaseModel):
+    id: int
+    lot_id: int
+    recycler_id: int
+    price_per_kg: float
+    status: OfferStatus
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+# ==========================================
+# 5. AI SERVICE SCHEMAS
 # ==========================================
 
 class AIAnalysisResponse(BaseModel):
     predicted_class: str
     confidence: float
     suggested_action: str = Field(
-        ..., 
+        ...,
         description="'auto_accept' if confidence >= 0.85 else 'manual_selection_required'"
     )
 
 
 # ==========================================
-# 5. TRANSACTION SCHEMAS
+# 6. TRANSACTION SCHEMAS
 # ==========================================
 
 class TransactionCreate(BaseModel):
@@ -122,8 +182,9 @@ class TransactionResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 # ==========================================
-# 6. AUTH SCHEMAS
+# 7. AUTH SCHEMAS
 # ==========================================
 
 class GoogleLoginRequest(BaseModel):

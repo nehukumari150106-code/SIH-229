@@ -1,46 +1,75 @@
-import React from "react";
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
-} from "react-native";
+  ActivityIndicator,
+} from 'react-native';
 
-import styles from "./aggregatorstyles";
+import styles from './aggregatorstyles';
 
-const lots = [
-  {
-    id: "LOT-1024",
-    material: "PCB",
-    weight: "25 kg",
-    collector: "Amit Shinde",
-    location: "Rajur",
-    status: "Received",
-  },
-  {
-    id: "LOT-1025",
-    material: "Cable",
-    weight: "40 kg",
-    collector: "Suresh Pawar",
-    location: "Parner",
-    status: "Received",
-  },
-  {
-    id: "LOT-1026",
-    material: "Motor",
-    weight: "18 kg",
-    collector: "Rahul Jadhav",
-    location: "Shirur",
-    status: "Processing",
-  },
-];
+const BACKEND_URL = 'http://127.0.0.1:8000';
 
-const IncomingLots = ({ navigation }) => {
+const getMaterialLabel = material => {
+  const categories = {
+    TV_MONITOR: '📺 TV / Monitor',
+    MOBILE_TABLET: '📱 Mobile / Tablet',
+    COMPUTER_LAPTOP: '💻 Computer / Laptop',
+    FRIDGE_AC: '🧊 Fridge / AC',
+    WASHING_APPLIANCE: '🧺 Washing Machine / Appliance',
+    CABLE_WIRE: '🔌 Wire / Cable / Charger',
+    OTHER_ELECTRONICS: '📦 Other Electronics',
+    NOT_SURE: '❓ Other / Not Sure',
+  };
+
+  return categories[material] || material;
+};
+
+const IncomingLots = ({navigation}) => {
+  const [lots, setLots] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    loadLots();
+  }, []);
+
+  const loadLots = async () => {
+    try {
+      setLoading(true);
+      setError('');
+
+      const response = await fetch(`${BACKEND_URL}/lots`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.detail || 'Failed to load lots',
+        );
+      }
+
+      console.log('Aggregator lots:', data);
+
+      setLots(data);
+    } catch (err) {
+      console.error('Load Lots Error:', err);
+      setError(
+        err.message || 'Unable to load incoming lots.',
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <ScrollView style={styles.container}>
 
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Incoming Lots</Text>
+        <Text style={styles.headerTitle}>
+          Incoming Lots
+        </Text>
+
         <Text style={styles.headerSubtitle}>
           Lots received from collectors
         </Text>
@@ -48,47 +77,93 @@ const IncomingLots = ({ navigation }) => {
 
       <View style={styles.content}>
 
-        {lots.map((lot) => (
-          <View style={styles.card} key={lot.id}>
-
-            <View style={styles.row}>
-              <Text style={styles.cardTitle}>{lot.id}</Text>
-              <Text style={styles.status}>{lot.status}</Text>
-            </View>
-
-            <Text style={styles.cardText}>
-              Material: {lot.material}
+        {loading && (
+          <View style={{padding: 20, alignItems: 'center'}}>
+            <ActivityIndicator size="large" />
+            <Text style={{marginTop: 10}}>
+              Loading lots...
             </Text>
+          </View>
+        )}
 
-            <Text style={styles.cardText}>
-              Weight: {lot.weight}
-            </Text>
-
-            <Text style={styles.cardText}>
-              Collector: {lot.collector}
-            </Text>
-
-            <Text style={styles.cardText}>
-              Location: {lot.location}
+        {!loading && error !== '' && (
+          <View style={{padding: 20}}>
+            <Text style={{color: '#C62828'}}>
+              {error}
             </Text>
 
             <TouchableOpacity
               style={styles.button}
-              onPress={() =>
-                navigation?.navigate("LotDetails", {
-                  lot: lot,
-                })
-              }
-            >
+              onPress={loadLots}>
               <Text style={styles.buttonText}>
-                View Details
+                Retry
               </Text>
             </TouchableOpacity>
-
           </View>
-        ))}
+        )}
+
+        {!loading && error === '' && lots.length === 0 && (
+          <View style={{padding: 20}}>
+            <Text>
+              No incoming lots available.
+            </Text>
+          </View>
+        )}
+
+        {!loading &&
+          error === '' &&
+          lots.map(lot => (
+            <View
+              style={styles.card}
+              key={String(lot.id)}>
+
+              <View style={styles.row}>
+
+                <Text style={styles.cardTitle}>
+                  LOT-{lot.id}
+                </Text>
+
+                <Text style={styles.status}>
+                  {lot.status?.toUpperCase()}
+                </Text>
+
+              </View>
+
+              <Text style={styles.cardText}>
+                Material:{' '}
+                {getMaterialLabel(
+                  lot.material_category,
+                )}
+              </Text>
+
+              <Text style={styles.cardText}>
+                Weight: {lot.actual_weight_kg} kg
+              </Text>
+
+              <Text style={styles.cardText}>
+                Pickup ID: {lot.pickup_id}
+              </Text>
+
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() =>
+                  navigation?.navigate(
+                    'LotDetails',
+                    {
+                      lot: lot,
+                    },
+                  )
+                }>
+                <Text style={styles.buttonText}>
+                  View Details
+                </Text>
+              </TouchableOpacity>
+
+            </View>
+          ))}
 
       </View>
+
     </ScrollView>
   );
 };

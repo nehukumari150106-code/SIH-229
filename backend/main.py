@@ -1,26 +1,54 @@
 import os
+
 import httpx
+
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
+
 from typing import List
-from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, status, Query
+
+from fastapi import (
+    FastAPI,
+    Depends,
+    HTTPException,
+    UploadFile,
+    File,
+    status,
+    Query,
+)
+
 from fastapi.middleware.cors import CORSMiddleware
+
 from sqlalchemy.orm import Session
 
 import models
 import schemas
+
 from database import engine, get_db
 
-# Initialize database schema
+
+# ==========================================
+# INITIALIZE DATABASE
+# ==========================================
+
 models.Base.metadata.create_all(bind=engine)
+
+
+# ==========================================
+# FASTAPI APP
+# ==========================================
 
 app = FastAPI(
     title="Kabadiwala Connect API",
     description="Backend service linking Mobile App (P1) with MobileNetV3 AI Inference (P6)",
-    version="1.0.0"
+    version="1.0.0",
 )
 
-# Place CORSMiddleware HERE, directly after `app` is instantiated
+
+# ==========================================
+# CORS
+# ==========================================
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -29,16 +57,31 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Route aligned with P6 active inference endpoint (/analyze)
-AI_SERVICE_URL = os.getenv("AI_SERVICE_URL", "http://127.0.0.1:8001/analyze")
+
+# ==========================================
+# CONFIGURATION
+# ==========================================
+
+AI_SERVICE_URL = os.getenv(
+    "AI_SERVICE_URL",
+    "http://127.0.0.1:8001/analyze",
+)
+
 GOOGLE_WEB_CLIENT_ID = (
     "681570710606-pff01be1mp7p0rclrkluoedu5hodiomj.apps.googleusercontent.com"
 )
 
 
+# ==========================================
+# HOME
+# ==========================================
+
 @app.get("/")
 def home():
-    return {"message": "Kabadiwala Connect Backend is running!"}
+    return {
+        "message": "Kabadiwala Connect Backend is running!"
+    }
+
 
 # ==========================================
 # AUTHENTICATION
@@ -47,11 +90,11 @@ def home():
 @app.post(
     "/api/v1/auth/google",
     response_model=schemas.UserResponse,
-    tags=["Authentication"]
+    tags=["Authentication"],
 )
 def google_login(
     request: schemas.GoogleLoginRequest,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     allowed_roles = {
         "customer",
@@ -63,7 +106,7 @@ def google_login(
     if request.role not in allowed_roles:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid role."
+            detail="Invalid role.",
         )
 
     try:
@@ -72,10 +115,11 @@ def google_login(
             google_requests.Request(),
             GOOGLE_WEB_CLIENT_ID,
         )
+
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid Google ID token."
+            detail="Invalid Google ID token.",
         )
 
     google_uid = google_user.get("sub")
@@ -85,7 +129,7 @@ def google_login(
     if not google_uid or not email:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Google account information is incomplete."
+            detail="Google account information is incomplete.",
         )
 
     user = (
@@ -95,6 +139,7 @@ def google_login(
     )
 
     if user is None:
+
         user = models.User(
             google_uid=google_uid,
             name=name,
@@ -107,11 +152,13 @@ def google_login(
         db.refresh(user)
 
     else:
+
         user.name = name
         user.email = email
 
         # Allow normal users to change their selected role.
         # Admin accounts cannot be changed through this endpoint.
+
         if user.role != "admin":
             user.role = request.role
 
@@ -119,55 +166,91 @@ def google_login(
         db.refresh(user)
 
     return user
+
+
 # ==========================================
 # 1. AI PROXY ENDPOINT
 # ==========================================
 
-@app.post("/api/v1/ai/analyze", response_model=schemas.AIAnalysisResponse)
-async def analyze_image(file: UploadFile = File(...)):
+@app.post(
+    "/api/v1/ai/analyze",
+    response_model=schemas.AIAnalysisResponse,
+)
+async def analyze_image(
+    file: UploadFile = File(...)
+):
     """
-    Forwards user uploaded images to the P6 MobileNetV3 AI Inference service.
+    Forwards user uploaded images to the P6
+    MobileNetV3 AI Inference service.
+
     Applies the 0.85 confidence guardrail.
     """
+
     if not file.content_type.startswith("image/"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Uploaded file must be an image."
+            detail="Uploaded file must be an image.",
         )
 
     try:
-        # Read file bytes correctly into file_bytes
+
+        # Read file bytes
         file_bytes = await file.read()
-        
+
         async with httpx.AsyncClient(timeout=10.0) as client:
+
             response = await client.post(
                 AI_SERVICE_URL,
-                files={"image": (file.filename, file_bytes, file.content_type)}
+                files={
+                    "image": (
+                        file.filename,
+                        file_bytes,
+                        file.content_type,
+                    )
+                },
             )
 
         if response.status_code != 200:
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
-                detail=f"AI service error: {response.text}"
+                detail=f"AI service error: {response.text}",
             )
 
         data = response.json()
-        predicted_class = data.get("predicted_class", "NOT_SURE")
-        confidence = float(data.get("confidence", 0.0))
+
+        predicted_class = data.get(
+            "predicted_class",
+            "NOT_SURE",
+        )
+
+        confidence = float(
+            data.get(
+                "confidence",
+                0.0,
+            )
+        )
 
         # Enforce 0.85 Confidence Guardrail
-        suggested_action = "auto_accept" if confidence >= 0.85 else "manual_selection_required"
+        suggested_action = (
+            "auto_accept"
+            if confidence >= 0.85
+            else "manual_selection_required"
+        )
 
         return schemas.AIAnalysisResponse(
             predicted_class=predicted_class,
             confidence=confidence,
-            suggested_action=suggested_action
+            suggested_action=suggested_action,
         )
 
     except httpx.RequestError as exc:
+
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Could not connect to AI Inference service at {AI_SERVICE_URL}: {str(exc)}"
+            detail=(
+                f"Could not connect to AI Inference service "
+                f"at {AI_SERVICE_URL}: {str(exc)}"
+            ),
         )
 
 
@@ -175,25 +258,45 @@ async def analyze_image(file: UploadFile = File(...)):
 # 2. PRICING & RECYCLER MATCHING
 # ==========================================
 
-@app.get("/api/v1/prices", response_model=List[schemas.MaterialPriceResponse])
-def get_material_prices(db: Session = Depends(get_db)):
+@app.get(
+    "/api/v1/prices",
+    response_model=List[schemas.MaterialPriceResponse],
+)
+def get_material_prices(
+    db: Session = Depends(get_db)
+):
     """Returns price per kg for all registered e-waste classes."""
+
     return db.query(models.MaterialPrice).all()
 
 
-@app.get("/api/v1/recyclers/match", response_model=List[schemas.RecyclerResponse])
+@app.get(
+    "/api/v1/recyclers/match",
+    response_model=List[schemas.RecyclerResponse],
+)
 def match_recyclers(
-    category: str = Query(..., description="E-waste category, e.g. CABLE_WIRE"),
-    db: Session = Depends(get_db)
+    category: str = Query(
+        ...,
+        description="E-waste category, e.g. CABLE_WIRE",
+    ),
+    db: Session = Depends(get_db),
 ):
     """Filters recyclers that accept a specified e-waste category."""
+
     all_recyclers = db.query(models.Recycler).all()
-    
+
     # In-memory filter for SQLite JSON compatibility
     matched = [
-        recycler for recycler in all_recyclers
-        if recycler.accepted_categories and category.upper() in [c.upper() for c in recycler.accepted_categories]
+        recycler
+        for recycler in all_recyclers
+        if recycler.accepted_categories
+        and category.upper()
+        in [
+            c.upper()
+            for c in recycler.accepted_categories
+        ]
     ]
+
     return matched
 
 
@@ -201,21 +304,30 @@ def match_recyclers(
 # 3. PICKUP REQUEST ENDPOINTS
 # ==========================================
 
+
+# ------------------------------------------
+# CREATE PICKUP
+# ------------------------------------------
+
 @app.post(
-    "/pickups/", 
-    response_model=schemas.PickupRequestResponse, 
+    "/pickups/",
+    response_model=schemas.PickupRequestResponse,
     status_code=status.HTTP_201_CREATED,
-    tags=["Pickups"]
+    tags=["Pickups"],
 )
 def create_pickup(
     request: schemas.PickupRequestCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
-    """Creates a pickup request with customer ownership and AI classification telemetry."""
+    """
+    Creates a pickup request with customer ownership
+    and AI classification telemetry.
+    """
 
     data = request.model_dump()
 
-    # Fallback guardrail: ensure scrap_type receives a valid classification
+    # Fallback guardrail:
+    # ensure scrap_type receives a valid classification
     data["scrap_type"] = (
         request.user_confirmed_class
         or request.ai_predicted_class
@@ -225,13 +337,17 @@ def create_pickup(
     if not data["scrap_type"]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="A valid scrap_type, user_confirmed_class, or ai_predicted_class must be provided."
+            detail=(
+                "A valid scrap_type, "
+                "user_confirmed_class, or "
+                "ai_predicted_class must be provided."
+            ),
         )
 
     # Create pickup
     db_pickup = models.PickupRequest(
         **data,
-        status=models.PickupStatus.PENDING
+        status=models.PickupStatus.PENDING,
     )
 
     db.add(db_pickup)
@@ -241,28 +357,231 @@ def create_pickup(
     return db_pickup
 
 
+# ------------------------------------------
+# GET ALL PICKUPS
+# ------------------------------------------
+
 @app.get(
-    "/pickups/", 
+    "/pickups/",
     response_model=List[schemas.PickupRequestResponse],
-    tags=["Pickups"]
+    tags=["Pickups"],
 )
-def get_all_pickups(db: Session = Depends(get_db)):
-    """Retrieves all pickup requests."""
-    return db.query(models.PickupRequest).all()
+def get_all_pickups(
+    db: Session = Depends(get_db),
+):
+    """
+    Retrieves all pickup requests.
+
+    Used by Collector → Incoming Requests.
+    """
+
+    return db.query(
+        models.PickupRequest
+    ).all()
+
+
+# ------------------------------------------
+# ASSIGN / ACCEPT PICKUP
+# ------------------------------------------
+
+@app.patch(
+    "/pickups/{pickup_id}/weight",
+    response_model=schemas.PickupRequestResponse,
+    tags=["Pickups"],
+)
+def record_pickup_weight(
+    pickup_id: int,
+    actual_weight_kg: float,
+    db: Session = Depends(get_db),
+):
+    """
+    Records the actual weight collected by the collector.
+
+    ASSIGNED → IN_PROGRESS
+    """
+
+    if actual_weight_kg <= 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Actual weight must be greater than 0 kg.",
+        )
+
+    pickup = (
+        db.query(models.PickupRequest)
+        .filter(
+            models.PickupRequest.id == pickup_id
+        )
+        .first()
+    )
+
+    if not pickup:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Pickup request not found.",
+        )
+
+    if pickup.status != models.PickupStatus.ASSIGNED:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Only assigned pickups can have their weight recorded.",
+        )
+
+    pickup.actual_weight_kg = actual_weight_kg
+    pickup.status = models.PickupStatus.IN_PROGRESS
+
+    db.commit()
+    db.refresh(pickup)
+
+    return pickup
+@app.post(
+    "/pickups/{pickup_id}/lot",
+    response_model=schemas.LotResponse,
+    status_code=status.HTTP_201_CREATED,
+    tags=["Lots"],
+)
+def create_lot_from_pickup(
+    pickup_id: int,
+    db: Session = Depends(get_db),
+):
+    """
+    Creates a Lot from a pickup after the collector
+    has recorded the actual collected weight.
+    """
+
+    pickup = (
+        db.query(models.PickupRequest)
+        .filter(
+            models.PickupRequest.id == pickup_id
+        )
+        .first()
+    )
+
+    if not pickup:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Pickup request not found.",
+        )
+
+    # A Lot can only be created after actual weight
+    # has been recorded.
+    if pickup.actual_weight_kg is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Actual weight must be recorded before creating a Lot.",
+        )
+
+    # Prevent duplicate Lots for the same pickup.
+    existing_lot = (
+        db.query(models.Lot)
+        .filter(
+            models.Lot.pickup_id == pickup_id
+        )
+        .first()
+    )
+
+    if existing_lot:
+        return existing_lot
+
+    lot = models.Lot(
+        pickup_id=pickup.id,
+        material_category=pickup.scrap_type,
+        actual_weight_kg=pickup.actual_weight_kg,
+        status=models.LotStatus.CREATED,
+    )
+
+    db.add(lot)
+
+    # Pickup has now moved from the collection stage
+    # to the Lot stage.
+    pickup.status = models.PickupStatus.COMPLETED
+
+    db.commit()
+    db.refresh(lot)
+
+    return lot
+@app.get(
+    "/lots",
+    response_model=List[schemas.LotResponse],
+    tags=["Lots"],
+)
+def get_lots(
+    db: Session = Depends(get_db),
+):
+    """
+    Returns all Lots available to the Aggregator.
+    """
+
+    return (
+        db.query(models.Lot)
+        .order_by(models.Lot.created_at.desc())
+        .all()
+    )
+@app.patch(
+    "/lots/{lot_id}/inventory",
+    response_model=schemas.LotResponse,
+    tags=["Lots"],
+)
+def add_lot_to_inventory(
+    lot_id: int,
+    db: Session = Depends(get_db),
+):
+    """
+    Moves a created Lot into Aggregator inventory.
+    """
+
+    lot = (
+        db.query(models.Lot)
+        .filter(models.Lot.id == lot_id)
+        .first()
+    )
+
+    if not lot:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Lot not found.",
+        )
+
+    if lot.status == models.LotStatus.AVAILABLE:
+        return lot
+
+    if lot.status != models.LotStatus.CREATED:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Only created Lots can be added to inventory.",
+        )
+
+    lot.status = models.LotStatus.AVAILABLE
+
+    db.commit()
+    db.refresh(lot)
+
+    return lot
+
+
+# ------------------------------------------
+# GET CUSTOMER PICKUPS
+# ------------------------------------------
+
 @app.get(
     "/pickups/customer/{customer_id}",
     response_model=List[schemas.PickupRequestResponse],
-    tags=["Pickups"]
+    tags=["Pickups"],
 )
 def get_customer_pickups(
     customer_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
-    """Retrieves pickup requests belonging to a specific customer."""
+    """
+    Retrieves pickup requests belonging
+    to a specific customer.
+    """
 
     return (
         db.query(models.PickupRequest)
-        .filter(models.PickupRequest.customer_id == customer_id)
+        .filter(
+            models.PickupRequest.customer_id
+            == customer_id
+        )
         .all()
     )
 
@@ -271,67 +590,136 @@ def get_customer_pickups(
 # 4. TRANSACTION ENDPOINTS
 # ==========================================
 
-@app.post("/api/v1/transactions", response_model=schemas.TransactionResponse, status_code=status.HTTP_201_CREATED)
-def create_transaction(transaction: schemas.TransactionCreate, db: Session = Depends(get_db)):
-    pickup = db.query(models.PickupRequest).filter(models.PickupRequest.id == transaction.pickup_id).first()
+@app.post(
+    "/api/v1/transactions",
+    response_model=schemas.TransactionResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_transaction(
+    transaction: schemas.TransactionCreate,
+    db: Session = Depends(get_db),
+):
+
+    pickup = (
+        db.query(models.PickupRequest)
+        .filter(
+            models.PickupRequest.id
+            == transaction.pickup_id
+        )
+        .first()
+    )
+
     if not pickup:
-        raise HTTPException(status_code=404, detail="Pickup request not found")
-        
-    recycler = db.query(models.Recycler).filter(models.Recycler.id == transaction.recycler_id).first()
+        raise HTTPException(
+            status_code=404,
+            detail="Pickup request not found",
+        )
+
+    recycler = (
+        db.query(models.Recycler)
+        .filter(
+            models.Recycler.id
+            == transaction.recycler_id
+        )
+        .first()
+    )
+
     if not recycler:
-        raise HTTPException(status_code=404, detail="Recycler not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Recycler not found",
+        )
 
     db_transaction = models.Transaction(
         pickup_id=transaction.pickup_id,
         recycler_id=transaction.recycler_id,
         final_weight_kg=transaction.final_weight_kg,
         total_payout=transaction.total_payout,
-        status=models.TransactionStatus.INITIATED
+        status=models.TransactionStatus.INITIATED,
     )
-    
+
     pickup.status = models.PickupStatus.ASSIGNED
-    
+
     db.add(db_transaction)
     db.commit()
     db.refresh(db_transaction)
+
     return db_transaction
 
+
 # ==========================================
-# UNIFIED SCAN & MATCH ENDPOINT
+# 5. UNIFIED SCAN & MATCH ENDPOINT
 # ==========================================
 
-@app.post("/api/v1/e-waste/scan-and-match", tags=["E-Waste Operations"])
+@app.post(
+    "/api/v1/e-waste/scan-and-match",
+    tags=["E-Waste Operations"],
+)
 async def scan_and_match(
-    file: UploadFile = File(...), 
-    db: Session = Depends(get_db)
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
 ):
     """
     Unified Endpoint for P1 Frontend:
-    1. Forwards image to P6 AI for MobileNetV3 classification.
-    2. Fetches per-kg valuation for predicted scrap category.
-    3. Finds active recyclers accepting this scrap category.
+
+    1. Forwards image to P6 AI for MobileNetV3
+       classification.
+
+    2. Fetches per-kg valuation for predicted
+       scrap category.
+
+    3. Finds active recyclers accepting this
+       scrap category.
     """
+
+    # --------------------------------------
     # 1. Run AI Inference via P6 Proxy
+    # --------------------------------------
+
     ai_result = await analyze_image(file)
+
     predicted_cat = ai_result.predicted_class
 
-    # 2. Fetch Pricing Data matching your exact schema attribute
-    # Fetch Pricing Data matching your exact schema attribute
-    price_entry = db.query(models.MaterialPrice).filter(
-        models.MaterialPrice.category_name == predicted_cat  # Adjust 'category_name' to match models.py
-    ).first()
-    
-    price_per_kg = price_entry.price_per_kg if price_entry else 0.0
+    # --------------------------------------
+    # 2. Fetch Pricing Data
+    # --------------------------------------
 
+    price_entry = (
+        db.query(models.MaterialPrice)
+        .filter(
+            models.MaterialPrice.category_name
+            == predicted_cat
+        )
+        .first()
+    )
+
+    price_per_kg = (
+        price_entry.price_per_kg
+        if price_entry
+        else 0.0
+    )
+
+    # --------------------------------------
     # 3. Match Recyclers
-    all_recyclers = db.query(models.Recycler).all()
+    # --------------------------------------
+
+    all_recyclers = (
+        db.query(models.Recycler).all()
+    )
+
     matched_recyclers = [
-        r for r in all_recyclers
-        if r.accepted_categories and predicted_cat.upper() in [c.upper() for c in r.accepted_categories]
+        recycler
+        for recycler in all_recyclers
+        if recycler.accepted_categories
+        and predicted_cat.upper()
+        in [
+            c.upper()
+            for c in recycler.accepted_categories
+        ]
     ]
 
     return {
         "classification": ai_result,
         "price_per_kg": price_per_kg,
-        "matched_recyclers": matched_recyclers
+        "matched_recyclers": matched_recyclers,
     }
