@@ -6,26 +6,27 @@ import AggregatorNavigator from './src/navigation/AggregatorNavigator';
 import RecyclerNavigator from './src/navigation/RecyclerNavigator';
 
 function App() {
-  const [userRole, setUserRole] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
 
-  if (userRole === 'collector') {
+  if (currentUser?.role === 'collector') {
     return <CollectorNavigator />;
   }
 
-  if (userRole === 'aggregator') {
+  if (currentUser?.role === 'aggregator') {
     return <AggregatorNavigator />;
   }
 
-  if (userRole === 'recycler') {
+  if (currentUser?.role === 'recycler') {
     return <RecyclerNavigator />;
   }
 
   return (
-  <CustomerNavigator
-    onAuthenticated={setUserRole}
-    startAtDashboard={userRole === 'customer'}
-  />
-);
+    <CustomerNavigator
+      onAuthenticated={setCurrentUser}
+      startAtDashboard={currentUser?.role === 'customer'}
+      currentUser={currentUser}
+    />
+  );
 }
 
 export default App;

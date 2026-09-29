@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -8,10 +8,11 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-import { CUSTOMER_CATEGORIES } from '../../constants/customerCategories';
-import { createPickup } from '../../services/api';
 
-function CreatePickup({ navigation }) {
+import {CUSTOMER_CATEGORIES} from '../../constants/customerCategories';
+import {createPickup} from '../../services/api';
+
+function CreatePickup({navigation, currentUser}) {
   const [customerCategory, setCustomerCategory] = useState(null);
   const [weight, setWeight] = useState('');
   const [location, setLocation] = useState('');
@@ -21,8 +22,8 @@ function CreatePickup({ navigation }) {
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={styles.content}
-    >
+      contentContainerStyle={styles.content}>
+      
       <Text style={styles.title}>Create Pickup</Text>
 
       <Text style={styles.subtitle}>
@@ -33,26 +34,33 @@ function CreatePickup({ navigation }) {
       <Text style={styles.label}>What do you have?</Text>
 
       <View style={styles.categoryContainer}>
-        {CUSTOMER_CATEGORIES.map((item) => (
+        {CUSTOMER_CATEGORIES.map(item => (
           <TouchableOpacity
             key={item.id}
             accessibilityRole="button"
             accessibilityLabel={`${item.label}, ${item.marathiLabel}`}
-            accessibilityState={{ selected: customerCategory === item.id }}
+            accessibilityState={{
+              selected: customerCategory === item.id,
+            }}
             style={[
               styles.categoryButton,
               customerCategory === item.id && styles.categorySelected,
             ]}
-            onPress={() => setCustomerCategory(item.id)}
-          >
-            <Text style={styles.categoryEmoji}>{item.emoji}</Text>
+            onPress={() => setCustomerCategory(item.id)}>
+            
+            <Text style={styles.categoryEmoji}>
+              {item.emoji}
+            </Text>
+
             <Text
               style={[
                 styles.categoryText,
-                customerCategory === item.id && styles.categoryTextSelected,
-              ]}
-            >
-              {item.label}{'\n'}{item.marathiLabel}
+                customerCategory === item.id &&
+                  styles.categoryTextSelected,
+              ]}>
+              {item.label}
+              {'\n'}
+              {item.marathiLabel}
             </Text>
           </TouchableOpacity>
         ))}
@@ -63,11 +71,16 @@ function CreatePickup({ navigation }) {
 
       <TouchableOpacity style={styles.photoButton}>
         <Text style={styles.photoIcon}>📷</Text>
-        <Text style={styles.photoText}>Add Scrap Photo</Text>
+
+        <Text style={styles.photoText}>
+          Add Scrap Photo
+        </Text>
       </TouchableOpacity>
 
       {/* Weight */}
-      <Text style={styles.label}>Approx. Quantity / Weight</Text>
+      <Text style={styles.label}>
+        Approx. Quantity / Weight
+      </Text>
 
       <TextInput
         style={styles.input}
@@ -88,7 +101,9 @@ function CreatePickup({ navigation }) {
       />
 
       {/* Preferred Time */}
-      <Text style={styles.label}>Preferred Pickup Time</Text>
+      <Text style={styles.label}>
+        Preferred Pickup Time
+      </Text>
 
       <TextInput
         style={styles.input}
@@ -99,70 +114,108 @@ function CreatePickup({ navigation }) {
 
       {/* Create Pickup */}
       <TouchableOpacity
-  style={styles.createButton}
-  disabled={loading}
-  onPress={async () => {
-  if (!customerCategory || !weight || !location || !preferredTime) {
-    Alert.alert(
-      'Missing Information',
-      'Please fill in all pickup details.',
-    );
-    return;
-  }
+        style={styles.createButton}
+        disabled={loading}
+        onPress={async () => {
+          if (
+            !customerCategory ||
+            !weight ||
+            !location ||
+            !preferredTime
+          ) {
+            Alert.alert(
+              'Missing Information',
+              'Please fill in all pickup details.',
+            );
+            return;
+          }
 
-  try {
-    setLoading(true);
+          if (!currentUser?.id) {
+            Alert.alert(
+              'Login Required',
+              'Your customer account could not be identified. Please login again.',
+            );
+            return;
+          }
 
-    const selectedCategory = CUSTOMER_CATEGORIES.find(
-      item => item.id === customerCategory,
-    );
+          try {
+            setLoading(true);
 
-    const pickupData = {
-      name: 'Tejas',
-      phone: '9999999999',
-      address: location,
-      scrap_type: customerCategory,
-      estimated_weight_kg: parseFloat(weight),
-      image_url: null,
-      ai_predicted_class: null,
-      ai_confidence: null,
-      user_confirmed_class: customerCategory,
-    };
+            const selectedCategory =
+              CUSTOMER_CATEGORIES.find(
+                item => item.id === customerCategory,
+              );
 
-    console.log('Sending pickup to backend:', pickupData);
+            const pickupData = {
+              // Logged-in customer
+              customer_id: currentUser.id,
 
-    const pickup = await createPickup(pickupData);
+              // Customer information
+              name: currentUser.name || 'Customer',
+              phone: '9999999999',
 
-    console.log('Pickup created by backend:', pickup);
+              // Pickup information
+              address: location,
+              scrap_type: customerCategory,
+              estimated_weight_kg: parseFloat(weight),
 
-   navigation.navigate('PickupDetails', {
-  pickup: {
-    ...pickup,
-    preferred_time: preferredTime,
-  },
-});
+              // Preferred pickup time
+              preferred_time: preferredTime,
 
-    Alert.alert(
-      'Pickup Created! 🎉',
-      `Your ${selectedCategory.label} pickup request has been created.`,
-    );
-  } catch (error) {
-    console.error('Pickup creation failed:', error);
+              // AI fields
+              image_url: null,
+              ai_predicted_class: null,
+              ai_confidence: null,
+              user_confirmed_class: customerCategory,
+            };
 
-    Alert.alert(
-      'Pickup Failed',
-      error.message || 'Could not create pickup. Please try again.',
-    );
-  } finally {
-    setLoading(false);
-  }
-}}
-      >
-       <Text style={styles.createButtonText}>
-  {loading ? 'Creating Pickup...' : 'Create Pickup'}
-</Text>
+            console.log(
+              'Logged-in customer:',
+              currentUser,
+            );
+
+            console.log(
+              'Sending pickup to backend:',
+              pickupData,
+            );
+
+            const pickup = await createPickup(pickupData);
+
+            console.log(
+              'Pickup created by backend:',
+              pickup,
+            );
+
+            navigation.navigate('PickupDetails', {
+              pickup: pickup,
+            });
+
+            Alert.alert(
+              'Pickup Created! 🎉',
+              `Your ${selectedCategory.label} pickup request has been created.`,
+            );
+          } catch (error) {
+            console.error(
+              'Pickup creation failed:',
+              error,
+            );
+
+            Alert.alert(
+              'Pickup Failed',
+              error.message ||
+                'Could not create pickup. Please try again.',
+            );
+          } finally {
+            setLoading(false);
+          }
+        }}>
+        
+        <Text style={styles.createButtonText}>
+          {loading
+            ? 'Creating Pickup...'
+            : 'Create Pickup'}
+        </Text>
       </TouchableOpacity>
-
     </ScrollView>
   );
 }

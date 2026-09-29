@@ -14,7 +14,11 @@ import CustomerProfile from '../screens/customer/CustomerProfile';
 
 const Stack = createNativeStackNavigator();
 
-function CustomerNavigator({onAuthenticated, startAtDashboard = false}) {  return (
+function CustomerNavigator({
+  onAuthenticated,
+  startAtDashboard = false,
+  currentUser,
+}) {  return (
     <NavigationContainer>
       <Stack.Navigator
   initialRouteName={startAtDashboard ? 'CustomerDashboard' : 'Login'}>
@@ -32,15 +36,25 @@ function CustomerNavigator({onAuthenticated, startAtDashboard = false}) {  retur
 </Stack.Screen>
 
         <Stack.Screen
-          name="CustomerDashboard"
-          component={CustomerDashboard}
-          options={{ title: 'Dashboard' }}
-        />
+  name="CustomerDashboard"
+  options={{title: 'Dashboard'}}>
+  {props => (
+    <CustomerDashboard
+      {...props}
+      currentUser={currentUser}
+    />
+  )}
+</Stack.Screen>
         <Stack.Screen
   name="CreatePickup"
-  component={CreatePickup}
-  options={{ title: 'Create Pickup' }}
-/>
+  options={{title: 'Create Pickup'}}>
+  {props => (
+    <CreatePickup
+      {...props}
+      currentUser={currentUser}
+    />
+  )}
+</Stack.Screen>
 <Stack.Screen
   name="PickupDetails"
   component={PickupDetails}
@@ -48,9 +62,14 @@ function CustomerNavigator({onAuthenticated, startAtDashboard = false}) {  retur
 />
 <Stack.Screen
   name="MyPickups"
-  component={MyPickups}
-  options={{ title: 'My Pickups' }}
-/>
+  options={{title: 'My Pickups'}}>
+  {props => (
+    <MyPickups
+      {...props}
+      currentUser={currentUser}
+    />
+  )}
+</Stack.Screen>
 <Stack.Screen
   name="PickupTracking"
   component={PickupTracking}

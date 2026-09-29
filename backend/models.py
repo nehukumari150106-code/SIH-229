@@ -34,11 +34,18 @@ class PickupRequest(Base):
     __tablename__ = "pickup_requests"
 
     id = Column(Integer, primary_key=True, index=True)
+
+    # Customer ownership
+    customer_id = Column(Integer, nullable=True, index=True)
+
     name = Column(String(100), nullable=False)
     phone = Column(String(20), nullable=False, index=True)
     address = Column(String(255), nullable=False)
     scrap_type = Column(String(50), nullable=False)
     estimated_weight_kg = Column(Float, nullable=False)
+
+    # Preferred pickup time
+    preferred_time = Column(String(100), nullable=True)
 
     # AI & Media Fields for P1 + P6 Integration
     image_url = Column(String(500), nullable=True)
@@ -62,8 +69,7 @@ class PickupRequest(Base):
         "Transaction",
         back_populates="pickup"
     )
-
-
+    
 class MaterialPrice(Base):
     __tablename__ = "material_prices"
 

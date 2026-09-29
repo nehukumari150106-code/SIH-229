@@ -50,11 +50,15 @@ class RecyclerResponse(RecyclerBase):
 # ==========================================
 
 class PickupRequestCreate(BaseModel):
+    customer_id: Optional[int] = None
     name: str
     phone: str
     address: str
     scrap_type: str
     estimated_weight_kg: float = Field(..., gt=0)
+
+    preferred_time: Optional[str] = None
+
     image_url: Optional[str] = None
     ai_predicted_class: Optional[str] = None
     ai_confidence: Optional[float] = None
@@ -63,15 +67,20 @@ class PickupRequestCreate(BaseModel):
 
 class PickupRequestResponse(BaseModel):
     id: int
+    customer_id: Optional[int] = None
     name: str
     phone: str
     address: str
     scrap_type: str
     estimated_weight_kg: float
+
+    preferred_time: Optional[str] = None
+
     image_url: Optional[str] = None
     ai_predicted_class: Optional[str] = None
     ai_confidence: Optional[float] = None
     user_confirmed_class: Optional[str] = None
+
     status: PickupStatus
     created_at: datetime
 

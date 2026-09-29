@@ -83,19 +83,21 @@ export const createPickup = async pickupData => {
   }
 };
 // 5. Fetch customer pickup requests
-export const fetchPickups = async () => {
+export const fetchPickups = async customerId => {
   try {
-    const response = await fetch(`${BASE_URL}/pickups/`);
+    const response = await fetch(
+      `${BASE_URL}/pickups/customer/${customerId}`,
+    );
 
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.detail || 'Failed to fetch pickups');
+      throw new Error(data.detail || 'Failed to fetch customer pickups');
     }
 
     return data;
   } catch (error) {
-    console.error('Fetch Pickups API Error:', error);
+    console.error('Fetch Customer Pickups API Error:', error);
     throw error;
   }
 };

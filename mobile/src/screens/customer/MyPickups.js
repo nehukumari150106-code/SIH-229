@@ -10,18 +10,21 @@ import {
 import {getCustomerCategory} from '../../constants/customerCategories';
 import {fetchPickups} from '../../services/api';
 
-function MyPickups({navigation}) {
+function MyPickups({navigation, currentUser}) {
   const [pickups, setPickups] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadPickups();
-  }, []);
+    if (currentUser?.id) {
+      loadPickups();
+    }
+  }, [currentUser]);
 
   const loadPickups = async () => {
     try {
-      const data = await fetchPickups();
+      const data = await fetchPickups(currentUser.id);
 
+      console.log('Pickups for customer:', currentUser.id);
       console.log('Pickups from backend:', data);
 
       setPickups(data);

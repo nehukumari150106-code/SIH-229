@@ -207,23 +207,37 @@ def match_recyclers(
     status_code=status.HTTP_201_CREATED,
     tags=["Pickups"]
 )
-def create_pickup(request: schemas.PickupRequestCreate, db: Session = Depends(get_db)):
-    """Creates a pickup request with optional AI classification telemetry."""
+def create_pickup(
+    request: schemas.PickupRequestCreate,
+    db: Session = Depends(get_db)
+):
+    """Creates a pickup request with customer ownership and AI classification telemetry."""
+
     data = request.model_dump()
-    
+
     # Fallback guardrail: ensure scrap_type receives a valid classification
-    data["scrap_type"] = request.user_confirmed_class or request.ai_predicted_class or request.scrap_type
-    
+    data["scrap_type"] = (
+        request.user_confirmed_class
+        or request.ai_predicted_class
+        or request.scrap_type
+    )
+
     if not data["scrap_type"]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="A valid scrap_type, user_confirmed_class, or ai_predicted_class must be provided."
         )
 
-    db_pickup = models.PickupRequest(**data, status=models.PickupStatus.PENDING)
+    # Create pickup
+    db_pickup = models.PickupRequest(
+        **data,
+        status=models.PickupStatus.PENDING
+    )
+
     db.add(db_pickup)
     db.commit()
     db.refresh(db_pickup)
+
     return db_pickup
 
 
@@ -235,6 +249,22 @@ def create_pickup(request: schemas.PickupRequestCreate, db: Session = Depends(ge
 def get_all_pickups(db: Session = Depends(get_db)):
     """Retrieves all pickup requests."""
     return db.query(models.PickupRequest).all()
+@app.get(
+    "/pickups/customer/{customer_id}",
+    response_model=List[schemas.PickupRequestResponse],
+    tags=["Pickups"]
+)
+def get_customer_pickups(
+    customer_id: int,
+    db: Session = Depends(get_db)
+):
+    """Retrieves pickup requests belonging to a specific customer."""
+
+    return (
+        db.query(models.PickupRequest)
+        .filter(models.PickupRequest.customer_id == customer_id)
+        .all()
+    )
 
 
 # ==========================================

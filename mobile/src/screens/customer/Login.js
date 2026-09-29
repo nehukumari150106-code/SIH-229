@@ -85,7 +85,7 @@ console.log('ROLE SELECTION SHOULD SHOW NOW');
     setShowRoleSelection(false);
 setPendingIdToken(null);
 
-onAuthenticated(user.role);
+onAuthenticated(user);
 
 navigation.replace('CustomerDashboard');
   } catch (error) {
